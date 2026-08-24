@@ -1095,11 +1095,7 @@ function LinkButton({ to, children, variant = 'primary', className = '', icon, f
 function BrandLogo({ dark = false }: { dark?: boolean }) {
   return (
     <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-slate-900' : 'bg-emerald-900'} shadow-sm`} aria-label="Synergy Brix logo">
-      <svg viewBox="0 0 64 64" className="h-7 w-7" role="img" aria-label="Synergy Brix logo mark">
-        <rect x="5" y="7" width="54" height="50" rx="10" fill={dark ? '#0f172a' : '#0B5D4B'} />
-        <path d="M18 18h10v28H18zM36 18h10v18H36zM18 18h28v10H18z" fill="#D4B56A" />
-        <path d="M26 26h17v8H26z" fill="#ffffff" opacity="0.92" />
-      </svg>
+      <img src="/assets/logo.png" className="h-7 w-7 object-contain" role="img" aria-label="Synergy Brix logo mark" alt="Synergy Brix logo mark" />
     </div>
   )
 }
