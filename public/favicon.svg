@@ -1,0 +1,5 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Synergy Brix logo">
+  <rect width="64" height="64" rx="14" fill="#0B5D4B"/>
+  <path d="M18 18h10v28H18zm18 0h10v18H36zm-18 0h28v10H18z" fill="#D4B56A"/>
+  <path d="M26 26h18v8H26z" fill="#ffffff" opacity="0.9"/>
+</svg>
