@@ -1,0 +1,22 @@
+# Frontend-only React + Vite project
+# Install via: npm install
+
+react
+react-dom
+react-router-dom
+framer-motion
+lucide-react
+react-hook-form
+zod
+@hookform/resolvers
+
+# Dev dependencies
+vite
+@vitejs/plugin-react
+tailwindcss
+postcss
+autoprefixer
+typescript
+@types/node
+@types/react
+@types/react-dom
