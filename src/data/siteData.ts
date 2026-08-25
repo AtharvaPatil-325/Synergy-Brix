@@ -59,7 +59,6 @@ export const navItems: NavItem[] = [
     children: [
       { label: 'Custom Software Development', to: '/services/custom-software-development' },
       { label: 'Web Application Development', to: '/services/web-development' },
-      { label: 'API Development', to: '/services/api-development' },
       { label: 'Business Automation', to: '/services/business-automation' },
       { label: 'Dashboard Development', to: '/services/dashboard-development' },
       { label: 'SaaS Development', to: '/services/saas-development' },
@@ -93,16 +92,7 @@ export const services: Service[] = [
     technology: ['React', 'TypeScript', 'HTML', 'CSS', 'REST APIs'],
     cta: 'Plan a web app',
   },
-  {
-    slug: 'api-development',
-    title: 'API Development',
-    short: 'Stable interfaces to connect systems, automate processes, and unlock data.',
-    problem: 'Disconnected software creates duplication, delays, and missed opportunities.',
-    solution: 'We design and implement secure, reliable APIs for integration and product extension.',
-    features: ['REST API design', 'Authentication flows', 'Versioning strategy', 'Error handling', 'Monitoring-ready endpoints'],
-    technology: ['Java', 'Spring Boot', 'REST', 'MySQL', 'PostgreSQL'],
-    cta: 'Build an integration layer',
-  },
+ 
   {
     slug: 'business-automation',
     title: 'Business Automation',
@@ -340,11 +330,9 @@ export const footerLinks = {
     { label: 'Industries', to: '/industries' },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },
-    { label: 'Careers', to: '/careers' },
     { label: 'Contact', to: '/contact' },
     { label: 'Privacy Policy', to: '/privacy' },
     { label: 'Terms & Conditions', to: '/terms' },
-    { label: 'Cookie Policy', to: '/cookies' },
   ],
   social: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com' },
@@ -398,12 +386,6 @@ export const pageMeta = {
     description: 'Explore practical insights on business software, automation, architecture, integrations, digital transformation, and technology strategy.',
     canonical: 'https://synergybrix.com/insights',
   },
-  careers: {
-    title: 'Careers | Synergy Brix',
-    description: 'Discover the Synergy Brix engineering culture, learning approach, and opportunities to join the team.',
-    canonical: 'https://synergybrix.com/careers',
-  },
-
   contact: {
     title: 'Contact | Synergy Brix',
     description: 'Tell Synergy Brix about your software challenge, automation idea, or business technology initiative.',
@@ -423,23 +405,12 @@ export const pageMeta = {
     title: 'Terms & Conditions | Synergy Brix',
     description: 'Read the Synergy Brix terms and conditions placeholder for legal review and future refinement.',
     canonical: 'https://synergybrix.com/terms',
-  },
-  cookies: {
-    title: 'Cookie Policy | Synergy Brix',
-    description: 'Review the Synergy Brix cookie policy placeholder and understand future cookie and tracking requirements.',
-    canonical: 'https://synergybrix.com/cookies',
-  },
-  notFound: {
-    title: 'Page Not Found | Synergy Brix',
-    description: 'The page you requested cannot be found. Return to the Synergy Brix homepage.',
-    canonical: 'https://synergybrix.com/404',
-  },
+  }
 }
 
 export const contactTypes = [
   'Custom Software',
   'Web Application',
-  'API Development',
   'Automation',
   'Dashboard',
   'SaaS Product',
