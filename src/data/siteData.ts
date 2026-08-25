@@ -59,6 +59,7 @@ export const navItems: NavItem[] = [
     children: [
       { label: 'Custom Software Development', to: '/services/custom-software-development' },
       { label: 'Web Application Development', to: '/services/web-development' },
+      { label: 'Business Automation', to: '/services/business-automation' },
       { label: 'Dashboard Development', to: '/services/dashboard-development' },
       { label: 'SaaS Development', to: '/services/saas-development' },
       { label: 'Cloud Solutions', to: '/services/cloud-solutions' },
@@ -91,8 +92,17 @@ export const services: Service[] = [
     technology: ['React', 'TypeScript', 'HTML', 'CSS', 'REST APIs'],
     cta: 'Plan a web app',
   },
-
-
+ 
+  {
+    slug: 'business-automation',
+    title: 'Business Automation',
+    short: 'Reduce friction with workflows that connect data, timing, and actions.',
+    problem: 'Manual handoffs slow teams and create avoidable operational risk.',
+    solution: 'We automate repeatable processes to save time and improve consistency across your business.',
+    features: ['Workflow automation', 'Notifications', 'Document processing', 'Task orchestration', 'Data sync'],
+    technology: ['Java', 'REST APIs', 'Cron jobs', 'Cloud services', 'Reporting'],
+    cta: 'Automate business workflows',
+  },
   {
     slug: 'dashboard-development',
     title: 'Dashboard Development',
@@ -376,7 +386,6 @@ export const pageMeta = {
     description: 'Explore practical insights on business software, automation, architecture, integrations, digital transformation, and technology strategy.',
     canonical: 'https://synergybrix.com/insights',
   },
-
   contact: {
     title: 'Contact | Synergy Brix',
     description: 'Tell Synergy Brix about your software challenge, automation idea, or business technology initiative.',
@@ -396,19 +405,12 @@ export const pageMeta = {
     title: 'Terms & Conditions | Synergy Brix',
     description: 'Read the Synergy Brix terms and conditions placeholder for legal review and future refinement.',
     canonical: 'https://synergybrix.com/terms',
-  },
-
-  notFound: {
-    title: 'Page Not Found | Synergy Brix',
-    description: 'The page you requested cannot be found. Return to the Synergy Brix homepage.',
-    canonical: 'https://synergybrix.com/404',
-  },
+  }
 }
 
 export const contactTypes = [
   'Custom Software',
   'Web Application',
-  'API Development',
   'Automation',
   'Dashboard',
   'SaaS Product',

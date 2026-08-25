@@ -1,43 +1,26 @@
 import { useEffect, useState } from 'react'
-import { BrowserRouter, Link, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowRight, ChevronDown, Check, Menu, X, ShieldCheck, Layers3, Building2, Sparkles, Code2, Mail, Phone, MapPin, ArrowUpRight } from 'lucide-react'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
+import { ArrowRight, ChevronDown, Check, Menu, X, ShieldCheck, Layers3, Building2, Sparkles, Code2, Mail, Phone, MapPin, Cloud, Database, BarChart3, Workflow, Globe2, Boxes, Compass, Rocket, Headphones } from 'lucide-react'
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import {
   blogPosts,
   caseStudies,
   companyValues,
-  contactTypes,
   footerLinks,
   faqs,
   homeProblems,
   homeSolutions,
   industries,
-  navItems,
   pageMeta,
   processSteps,
   services,
   solutions,
   technologyGroups,
-  budgetRanges,
-  timelines,
 } from './data/siteData'
-import { submitContactForm, type ContactFormValues } from './services/contactService'
 import { usePageMeta } from './hooks/usePageMeta'
 
-const contactSchema = z.object({
-  name: z.string().min(2, 'Please enter your name.'),
-  company: z.string().optional(),
-  email: z.string().email('Please enter a valid email address.'),
-  phone: z.string().optional(),
-  projectType: z.string().optional(),
-  budget: z.string().optional(),
-  timeline: z.string().optional(),
-  message: z.string().min(10, 'Please share a few details about your project.'),
-})
+const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfULk7ZMRSZ9krewdbd1elEYa8jLu0qmj3051MAKiYAqxCHcw/viewform?usp=header'
 
 function App() {
   return (
@@ -51,8 +34,12 @@ function AppShell() {
   const location = useLocation()
 
   useEffect(() => {
+    if (location.pathname === '/' && location.hash) {
+      window.setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'auto', block: 'start' }), 0)
+      return
+    }
     window.scrollTo({ top: 0, behavior: 'auto' })
-  }, [location.pathname])
+  }, [location.hash, location.pathname])
 
   return (
     <>
@@ -84,12 +71,62 @@ function AppShell() {
   )
 }
 
+const landingNavigation = [
+  { label: 'Home', id: 'home' },
+  { label: 'Services', id: 'services' },
+  { label: 'Solutions', id: 'solutions' },
+  { label: 'Work', id: 'work' },
+  { label: 'About', id: 'about' },
+]
+
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isServicesOpen, setIsServicesOpen] = useState(false)
+  const [isCompact, setIsCompact] = useState(false)
+  const [activeSection, setActiveSection] = useState('home')
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const updateHeader = () => setIsCompact(window.scrollY > 24)
+    updateHeader()
+    window.addEventListener('scroll', updateHeader, { passive: true })
+    return () => window.removeEventListener('scroll', updateHeader)
+  }, [])
+
+  useEffect(() => {
+    if (location.pathname !== '/') return
+    const sections = landingNavigation
+      .map(({ id }) => document.getElementById(id))
+      .filter((section): section is HTMLElement => Boolean(section))
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (visible) setActiveSection(visible.target.id)
+      },
+      { rootMargin: '-30% 0px -55% 0px', threshold: [0.05, 0.25, 0.5] },
+    )
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [location.pathname])
+
+  const goToSection = (id: string) => {
+    setActiveSection(id)
+    setIsOpen(false)
+    setIsServicesOpen(false)
+    if (location.pathname !== '/') {
+      navigate(`/#${id}`)
+      return
+    }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.history.replaceState(null, '', `#${id}`)
+  }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-emerald-200/60 bg-slate-950/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <header className={`sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl transition-all duration-300 ${isCompact ? 'shadow-[0_10px_30px_rgba(2,6,23,0.28)]' : ''}`}>
+      <div className={`mx-auto flex max-w-7xl items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${isCompact ? 'py-2' : 'py-3'}`}>
         <Link to="/" aria-label="Synergy Brix home" className="flex items-center gap-3">
           <BrandLogo />
           <div className="leading-tight">
@@ -98,40 +135,27 @@ function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex" aria-label="Main navigation">
-          {navItems.map((item) => {
-            if (item.children) {
-              return (
-                <div key={item.label} className="group relative">
-                  <button type="button" className="flex items-center gap-1 text-sm font-medium text-slate-200 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300">
-                    {item.label} <ChevronDown size={14} />
-                  </button>
-                  <div className="invisible absolute left-0 top-full mt-4 w-72 rounded-2xl border border-slate-700/70 bg-slate-900/95 p-3 opacity-0 shadow-[0_16px_52px_rgba(15,23,42,0.45)] transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                    {item.children.map((child) => (
-                      <Link key={child.to} to={child.to} className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white">
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )
-            }
-
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  `text-sm font-medium transition ${isActive ? 'text-white' : 'text-slate-300 hover:text-white'}`
-                }
-              >
-                {item.label}
-              </NavLink>
-            )
-          })}
+          {landingNavigation.map((item) => item.id === 'services' ? (
+            <div key={item.id} className="relative">
+              <button type="button" aria-expanded={isServicesOpen} aria-haspopup="menu" onClick={() => setIsServicesOpen((open) => !open)} className={`relative flex items-center gap-1 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-300 ${location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'}`}>
+                Services <ChevronDown size={14} className={`transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
+                <span className={`absolute bottom-0 left-0 h-px bg-emerald-300 transition-all duration-300 ${location.pathname === '/' && activeSection === item.id ? 'w-full' : 'w-0'}`} />
+              </button>
+              {isServicesOpen && <div className="absolute left-1/2 top-full mt-3 w-72 -translate-x-1/2 rounded-2xl border border-slate-700/80 bg-slate-900/95 p-2 shadow-[0_18px_48px_rgba(2,6,23,.45)] backdrop-blur-xl" role="menu">
+                <Link to="/services" onClick={() => setIsServicesOpen(false)} className="mb-1 block rounded-xl border border-emerald-400/15 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/15">All services</Link>
+                {services.map((service) => <Link key={service.slug} to={`/services/${service.slug}`} onClick={() => setIsServicesOpen(false)} className="block rounded-xl px-3 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white" role="menuitem">{service.title}</Link>)}
+              </div>}
+            </div>
+          ) : (
+            <button key={item.id} type="button" onClick={() => goToSection(item.id)} className={`relative py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-300 ${location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'}`}>
+              {item.label}
+              <span className={`absolute bottom-0 left-0 h-px bg-emerald-300 transition-all duration-300 ${location.pathname === '/' && activeSection === item.id ? 'w-full' : 'w-0'}`} />
+            </button>
+          ))}
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <LinkButton to="/contact" variant="primary">Start a Project</LinkButton>
+          <LinkButton to={GOOGLE_FORM_URL} variant="primary">Start a Project</LinkButton>
         </div>
 
         <button
@@ -148,24 +172,18 @@ function Navbar() {
       {isOpen && (
         <div className="border-t border-slate-700 bg-slate-950 lg:hidden">
           <div className="mx-auto max-w-7xl space-y-2 px-4 py-4 sm:px-6">
-            {navItems.map((item) =>
-              item.children ? (
-                <div key={item.label} className="space-y-2">
-                  <div className="px-2 py-2 text-sm font-semibold text-slate-200">{item.label}</div>
-                  {item.children.map((child) => (
-                    <Link key={child.to} to={child.to} className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-slate-900 hover:text-white" onClick={() => setIsOpen(false)}>
-                      {child.label}
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                <NavLink key={item.to} to={item.to} className={({ isActive }) => `block rounded-xl px-2 py-2 text-sm font-medium ${isActive ? 'bg-slate-900 text-white' : 'text-slate-300'}`} onClick={() => setIsOpen(false)}>
-                  {item.label}
-                </NavLink>
-              ),
-            )}
+            {landingNavigation.map((item) => item.id === 'services' ? (
+              <div key={item.id} className="rounded-xl border border-slate-800 bg-slate-900/40 p-1">
+                <div className="flex items-center justify-between"><button type="button" onClick={() => goToSection(item.id)} className="px-2 py-2.5 text-left text-sm font-medium text-emerald-200">Services</button><button type="button" aria-label="Toggle services menu" aria-expanded={isServicesOpen} onClick={() => setIsServicesOpen((open) => !open)} className="p-2 text-slate-300"><ChevronDown size={17} className={isServicesOpen ? 'rotate-180' : ''} /></button></div>
+                {isServicesOpen && <div className="border-t border-slate-800 px-1 py-2">{services.map((service) => <Link key={service.slug} to={`/services/${service.slug}`} onClick={() => { setIsOpen(false); setIsServicesOpen(false) }} className="block rounded-lg px-2 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white">{service.title}</Link>)}</div>}
+              </div>
+            ) : (
+              <button key={item.id} type="button" onClick={() => goToSection(item.id)} className={`block w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium ${location.pathname === '/' && activeSection === item.id ? 'bg-emerald-500/10 text-emerald-200' : 'text-slate-300 hover:bg-slate-900 hover:text-white'}`}>
+                {item.label}
+              </button>
+            ))}
             <div className="pt-2">
-              <LinkButton to="/contact" variant="primary" fullWidth onClick={() => setIsOpen(false)}>
+              <LinkButton to={GOOGLE_FORM_URL} variant="primary" fullWidth onClick={() => setIsOpen(false)}>
                 Start a Project
               </LinkButton>
             </div>
@@ -240,126 +258,71 @@ function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-slate-950">
+      <section id="home" className="relative overflow-hidden bg-slate-950">
         <div className="mesh-bg absolute inset-0" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_25%)]" />
         <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
-            <div className="section-tag mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
+          <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.11 } } }}>
+            <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.5 }} className="section-tag mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
               <Sparkles size={14} className="text-emerald-300" />
               Technology built for real business needs
-            </div>
-            <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.07em] text-white sm:text-5xl lg:text-6xl">
+            </motion.div>
+            <motion.h1 variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.65 }} className="max-w-2xl text-4xl font-semibold leading-[1.04] tracking-[-0.065em] text-white sm:text-5xl lg:text-6xl">
               Building digital solutions that move your business forward.
-            </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+            </motion.h1>
+            <motion.p variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
               Custom software, business automation, web applications, and digital systems designed around the way your business actually works.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <LinkButton to="/contact" variant="primary" icon={<ArrowRight size={18} />}>Start a Project</LinkButton>
+            </motion.p>
+            <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <LinkButton to={GOOGLE_FORM_URL} variant="primary" icon={<ArrowRight size={18} />}>Start a Project</LinkButton>
               <LinkButton to="/services" variant="secondary-light">Explore Our Services</LinkButton>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
+            </motion.div>
+            <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
               {['Custom software', 'Automation', 'APIs', 'Cloud', 'Dashboards'].map((item) => (
                 <span key={item} className="rounded-full border border-slate-700/80 bg-slate-900/40 px-3 py-1.5 backdrop-blur-sm">
                   {item}
                 </span>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, ease: 'easeOut' }} className="relative">
-            <div className="hero-shell relative overflow-hidden rounded-[32px] border border-emerald-300/20 bg-white/5 p-5 shadow-[0_34px_100px_rgba(15,23,42,0.45)] backdrop-blur-xl">
-              <div className="absolute -right-6 top-8 h-28 w-28 rounded-full bg-emerald-300/30 blur-3xl" />
-              <div className="absolute -left-4 bottom-8 h-36 w-36 rounded-full bg-violet-400/20 blur-3xl" />
-              <div className="relative flex items-center justify-between rounded-2xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-white">
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.25em] text-slate-400">System view</div>
-                  <div className="mt-2 text-xl font-semibold text-white">Synergy Brix</div>
-                </div>
-                <div className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">Operational</div>
-              </div>
-
-              <div className="relative mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-slate-700/80 bg-slate-900/80 p-4 text-white shadow-inner shadow-slate-950/30">
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="text-sm font-medium text-slate-300">Core services</div>
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-                  </div>
-                  <div className="space-y-3">
-                    <div className="h-9 rounded-xl bg-emerald-500/10" />
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="h-12 rounded-lg bg-slate-800" />
-                      <div className="h-12 rounded-lg bg-emerald-500/15" />
-                      <div className="h-12 rounded-lg bg-slate-800" />
-                    </div>
-                    <div className="h-12 rounded-xl bg-slate-800" />
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-slate-700/80 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/70 p-4 text-white">
-                  <div className="flex items-center justify-between text-sm text-slate-300">
-                    <span>Delivery model</span>
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">Live</span>
-                  </div>
-                  <div className="mt-5 space-y-3">
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-3xl font-semibold text-white">84%</span>
-                      <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400">workflows</span>
-                    </div>
-                    <div className="space-y-2">
-                      {[65, 78, 90].map((bar) => (
-                        <div key={bar} className="h-2.5 overflow-hidden rounded-full bg-slate-800">
-                          <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-amber-300" style={{ width: `${bar}%` }} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative mt-6 grid grid-cols-3 gap-3">
-                {[{ label: 'Custom', tone: 'emerald' }, { label: 'API', tone: 'slate' }, { label: 'Cloud', tone: 'amber' }].map((item) => (
-                  <div key={item.label} className={`rounded-2xl border p-3 ${item.tone === 'emerald' ? 'border-emerald-400/20 bg-emerald-500/10' : item.tone === 'amber' ? 'border-amber-400/20 bg-amber-500/10' : 'border-slate-600 bg-slate-800/70'}`}>
-                    <div className={`mb-2 inline-flex rounded-lg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${item.tone === 'emerald' ? 'bg-white/10 text-emerald-100' : item.tone === 'amber' ? 'bg-white/10 text-amber-100' : 'bg-white/10 text-slate-200'}`}>
-                      {item.label}
-                    </div>
-                    <div className="flex items-end gap-1">
-                      <div className="h-10 w-6 rounded-md bg-emerald-400/80" />
-                      <div className="h-14 w-6 rounded-md bg-slate-700" />
-                      <div className="h-8 w-6 rounded-md bg-amber-300/80" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-
+          <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.75, ease: 'easeOut' }} className="relative">
+            <ArchitectureVisual />
           </motion.div>
         </Container>
       </section>
 
-      <Section>
-        <Container>
-          <SectionHeading eyebrow="Why Synergy Brix" title="Technology built around your business." description="We don't just build software. We understand the problem, design the right solution, and engineer technology around the way your business works." />
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {[
-              { icon: <Building2 size={22} />, title: 'Business-first thinking', text: 'We start with business process, priorities, and outcomes.' },
-              { icon: <Sparkles size={22} />, title: 'Custom solutions', text: 'Every solution is designed for your operational reality.' },
-              { icon: <Layers3 size={22} />, title: 'Scalable architecture', text: 'Systems are structured for growth, maintenance, and change.' },
-              { icon: <ShieldCheck size={22} />, title: 'Security-conscious development', text: 'We build with access control and reliability in mind.' },
-            ].map((item, index) => (
-              <motion.div key={item.title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.35, delay: index * 0.06 }} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="mb-4 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-900">{item.icon}</div>
-                <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{item.text}</p>
-              </motion.div>
-            ))}
+      <section className="why-section relative overflow-hidden py-20 lg:py-24">
+        <div className="why-section-grid absolute inset-0" />
+        <div className="why-section-glow absolute -right-24 top-16 h-80 w-80 rounded-full" />
+        <Container className="relative grid items-center gap-12 lg:grid-cols-[.88fr_1.12fr]">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .2 }} transition={{ duration: .55 }} className="relative">
+            <div className="why-heading-line absolute -left-6 top-9 hidden h-24 w-px lg:block" />
+            <div className="section-tag inline-flex rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-emerald-800">Why Synergy Brix</div>
+            <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-[1.04] tracking-[-.06em] text-slate-950 sm:text-5xl">Technology built around your business.</h2>
+            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">We don&apos;t just build software. We understand the problem, design the right solution, and engineer technology around the way your business works.</p>
+            <div className="mt-8 flex items-center gap-3 text-sm font-medium text-emerald-900"><span className="h-px w-10 bg-emerald-500" />Business understanding, engineered into every layer.</div>
+          </motion.div>
+
+          <div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                { icon: Building2, number: '01', title: 'Business-first thinking', text: 'We start with business process, priorities, and outcomes.' },
+                { icon: Sparkles, number: '02', title: 'Custom solutions', text: 'Every solution is designed for your operational reality.' },
+                { icon: Layers3, number: '03', title: 'Scalable architecture', text: 'Systems are structured for growth, maintenance, and change.' },
+                { icon: ShieldCheck, number: '04', title: 'Security-conscious development', text: 'We build with access control and reliability in mind.' },
+              ].map(({ icon: Icon, number, title, text }, index) => (
+                <motion.article key={title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={{ duration: .42, delay: index * .09 }} className="why-principle group">
+                  <div className="flex items-start justify-between gap-4"><div className="why-principle-icon"><Icon size={20} /></div><span className="text-xs font-semibold tracking-[.16em] text-emerald-700">{number}</span></div>
+                  <h3 className="mt-5 text-lg font-semibold text-slate-950">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+                </motion.article>
+              ))}
+            </div>
           </div>
         </Container>
-      </Section>
+      </section>
 
-      <Section background="soft">
+      <Section id="services" background="soft">
         <Container>
           <div className="flex items-end justify-between gap-3">
             <SectionHeading eyebrow="Services" title="What we build" description="Focused software capabilities for businesses that need reliable digital systems." />
@@ -378,12 +341,13 @@ function HomePage() {
           <SectionHeading eyebrow="Business value" title="Problems we solve" description="We don’t add technology for the sake of it. We solve real business challenges by removing friction and improving operations." />
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             {homeProblems.map((problem) => (
-              <div key={problem.question} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div key={problem.question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:border-emerald-200 hover:shadow-md">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-900"><Check size={15} /></div>
+                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-900"><Check size={15} /></div>
                   <div>
                     <h3 className="text-lg font-semibold text-slate-900">{problem.question}</h3>
-                    <p className="mt-2 text-slate-600">{problem.answer}</p>
+                    <div className="mt-2 flex items-center gap-2 text-sm font-medium text-emerald-800"><ArrowRight size={15} /><span>Technology solution</span></div>
+                    <p className="mt-1 text-slate-600">{problem.answer}</p>
                   </div>
                 </div>
               </div>
@@ -392,7 +356,7 @@ function HomePage() {
         </Container>
       </Section>
 
-      <Section background="soft">
+      <Section id="solutions" background="soft">
         <Container>
           <SectionHeading eyebrow="Solutions" title="Business systems that create clarity and momentum" description="We design digital tools around the outcomes businesses need: smoother operations, better reporting, and scalable internal capability." />
           <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
@@ -449,9 +413,9 @@ function HomePage() {
         </Container>
       </Section>
 
-      <Section background="soft">
+      <Section id="about" background="soft">
         <Container>
-          <SectionHeading eyebrow="Why Synergy Brix" title="Structured for long-term business value" description="Every engagement is shaped around the realities of your operations, your teams, and your future growth." />
+          <SectionHeading eyebrow="About Synergy Brix" title="Structured for long-term business value" description="We are a software engineering partner focused on the realities of your operations, your teams, and your future growth." />
           <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {companyValues.map((value) => (
               <div key={value} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -463,7 +427,7 @@ function HomePage() {
         </Container>
       </Section>
 
-      <Section>
+      <Section id="work">
         <Container>
           <SectionHeading eyebrow="Work" title="Selected demonstration projects" description="We are building reusable case-study formats so real projects can be added easily and clearly as they become available." />
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
@@ -474,15 +438,69 @@ function HomePage() {
         </Container>
       </Section>
 
+      <div id="contact">
       <CTASection
         title="Have a business problem worth solving?"
         description="Tell us what you're trying to build, improve, or automate."
         primaryLabel="Start a Project"
         secondaryLabel="Talk to Us"
-        primaryHref="/contact"
-        secondaryHref="/contact"
+        primaryHref={GOOGLE_FORM_URL}
+        secondaryHref={GOOGLE_FORM_URL}
       />
+      </div>
     </>
+  )
+}
+
+const architectureNodes = [
+  { label: 'Web Apps', icon: Globe2, position: 'node-web' },
+  { label: 'APIs', icon: Boxes, position: 'node-api' },
+  { label: 'Automation', icon: Workflow, position: 'node-automation' },
+  { label: 'Cloud', icon: Cloud, position: 'node-cloud' },
+  { label: 'Database', icon: Database, position: 'node-database' },
+  { label: 'Analytics', icon: BarChart3, position: 'node-analytics' },
+]
+
+function ArchitectureVisual() {
+  return (
+    <div className="architecture-visual" aria-label="Synergy Brix digital system architecture">
+      <div className="architecture-grid" />
+      <div className="architecture-aurora architecture-aurora-one" />
+      <div className="architecture-aurora architecture-aurora-two" />
+      <svg className="architecture-links" viewBox="0 0 600 520" role="img" aria-label="Connections from Synergy Brix to business technology systems">
+        <defs>
+          <linearGradient id="architecture-line" x1="0" x2="1">
+            <stop stopColor="#34d399" stopOpacity=".12" />
+            <stop offset=".5" stopColor="#6ee7b7" stopOpacity=".85" />
+            <stop offset="1" stopColor="#34d399" stopOpacity=".12" />
+          </linearGradient>
+        </defs>
+        {['M286 239 C235 194 185 152 130 116', 'M316 239 C366 191 414 148 474 116', 'M270 273 C205 286 146 308 98 326', 'M330 273 C389 296 437 319 489 348', 'M284 285 C264 342 232 394 200 435', 'M320 285 C356 340 395 393 435 430'].map((path) => <path key={path} className="architecture-link" d={path} />)}
+        <circle className="architecture-particle particle-web" cx="286" cy="239" r="3" />
+        <circle className="architecture-particle particle-api" cx="316" cy="239" r="3" />
+        <circle className="architecture-particle particle-automation" cx="270" cy="273" r="3" />
+        <circle className="architecture-particle particle-cloud" cx="330" cy="273" r="3" />
+        <circle className="architecture-particle particle-database" cx="284" cy="285" r="3" />
+        <circle className="architecture-particle particle-analytics" cx="320" cy="285" r="3" />
+      </svg>
+
+      <div className="architecture-core">
+        <div className="architecture-core-orbit" />
+        <div className="architecture-core-inner">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-emerald-200/80">Connected by</span>
+          <span className="mt-1 block text-lg font-semibold tracking-[-0.04em] text-white">Synergy Brix</span>
+          <span className="mt-2 flex items-center justify-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-emerald-300"><i className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" />System core</span>
+        </div>
+      </div>
+
+      {architectureNodes.map(({ label, icon: Icon, position }) => (
+        <div key={label} className={`architecture-node ${position}`}>
+          <div className="architecture-node-icon"><Icon size={18} strokeWidth={1.8} /></div>
+          <span>{label}</span>
+        </div>
+      ))}
+      <div className="architecture-caption"><span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Business systems, connected with intent</div>
+    </div>
   )
 }
 
@@ -509,6 +527,7 @@ function AboutPage() {
 
 function ServicesPage() {
   usePageMeta(pageMeta.services)
+  const showLegacyServicesRedesign = false
 
   return (
     <PageShell title="Services" subtitle="Technology capabilities designed to solve real business challenges and support long-term growth." description="We help organizations modernize operations, build custom software, connect systems, and create practical digital tools that scale with the business.">
@@ -517,6 +536,59 @@ function ServicesPage() {
           <ServiceCard key={service.slug} service={service} detail />
         ))}
       </div>
+      {showLegacyServicesRedesign && <>
+      <section className="services-hero relative overflow-hidden bg-slate-950 text-white">
+        <div className="mesh-bg absolute inset-0 opacity-70" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_38%,rgba(16,185,129,0.2),transparent_23%),radial-gradient(circle_at_10%_90%,rgba(15,118,110,0.14),transparent_28%)]" />
+        <Container className="relative grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_.9fr] lg:py-20">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }}>
+            <div className="section-tag inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-emerald-100"><Sparkles size={13} /> Synergy Brix services</div>
+            <h1 className="mt-6 max-w-3xl text-4xl font-semibold leading-[1.03] tracking-[-.065em] sm:text-5xl lg:text-6xl">Technology that moves your business forward.</h1>
+            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Custom systems, connected workflows, and dependable software engineered around the way your business operates.</p>
+            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300"><span className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">Business-first engineering</span><span className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">Built to integrate</span></div>
+          </motion.div>
+          <motion.div initial={{ opacity: 0, scale: .95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .7, delay: .1 }}><div /></motion.div>
+        </Container>
+      </section>
+
+      <section className="py-14 lg:py-18">
+        <Container>
+          <SectionHeading eyebrow="Service capabilities" title="Purpose-built systems, not generic software." description="Each engagement begins with the business need, then brings together the technology, workflow, and data layers needed to solve it." />
+          <div className="mt-10 grid gap-5 lg:grid-cols-12">
+            <ServiceCard service={services[0]} detail />
+            <div className="grid gap-5 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+              <ServiceCard service={services[1]} detail />
+              <ServiceCard service={services[2]} detail />
+            </div>
+            {services.slice(3).map((service) => <ServiceCard key={service.slug} service={service} detail />)}
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-y border-slate-200 bg-white py-14 lg:py-16">
+        <Container>
+          <SectionHeading eyebrow="A connected approach" title="From business friction to better flow." description="We create the technology layer that lets people, processes, and information work together with more clarity." />
+          <div />
+        </Container>
+      </section>
+
+      <section className="py-14 lg:py-16">
+        <Container>
+          <SectionHeading eyebrow="How we build" title="A deliberate path from complexity to capability." description="A clear delivery model keeps decisions grounded in the business, while making space for the technical details that matter." />
+          <div className="mt-10 grid gap-4 md:grid-cols-5">
+            {['Understand the business', 'Design the solution', 'Build the system', 'Integrate existing tools', 'Deploy and improve'].map((step, index) => (
+              <motion.div key={step} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .2 }} transition={{ duration: .4, delay: index * .08 }} className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-md">
+                <div className="mb-8 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-950 text-sm font-semibold text-emerald-100">0{index + 1}</div>
+                <h3 className="text-lg font-semibold leading-6 text-slate-900">{step}</h3>
+                {index < 4 && <span className="absolute -right-3 top-9 z-10 hidden h-px w-6 bg-emerald-200 md:block" />}
+              </motion.div>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <CTASection title="Have a business problem worth solving?" description="Tell us what you need to improve, connect, or build. We’ll help shape a practical way forward." primaryLabel="Start a Project" secondaryLabel="Talk to Us" primaryHref="/contact" secondaryHref="/contact" />
+      </>}
     </PageShell>
   )
 }
@@ -526,8 +598,8 @@ function ServiceDetailPage() {
   const service = services.find((item) => item.slug === slug)
 
   usePageMeta({
-    title: service ? `${service.title} | Synergy Brix` : pageMeta.notFound.title,
-    description: service ? service.short : pageMeta.notFound.description,
+    title: service ? `${service.title} | Synergy Brix` : 'Page Not Found | Synergy Brix',
+    description: service ? service.short : 'The page you requested could not be found.',
     canonical: service ? `https://synergybrix.com/services/${service.slug}` : 'https://synergybrix.com/404',
   })
 
@@ -561,7 +633,7 @@ function ServiceDetailPage() {
           <div className="mt-8 rounded-2xl bg-emerald-900 p-6 text-white">
             <h4 className="text-lg font-semibold">Ready to move forward?</h4>
             <p className="mt-2 text-sm text-emerald-100">We can help shape the right technology approach for your goals.</p>
-            <LinkButton to="/contact" variant="secondary-light" className="mt-5">{service.cta}</LinkButton>
+            <LinkButton to={GOOGLE_FORM_URL} variant="secondary-light" className="mt-5">{service.cta}</LinkButton>
           </div>
         </div>
       </div>
@@ -629,8 +701,8 @@ function CaseStudyPage() {
   const item = caseStudies.find((entry) => entry.slug === slug)
 
   usePageMeta({
-    title: item ? `${item.title} | Synergy Brix` : pageMeta.notFound.title,
-    description: item ? item.overview : pageMeta.notFound.description,
+    title: item ? `${item.title} | Synergy Brix` : 'Not Found | Synergy Brix',
+    description: item ? item.overview : 'The page you requested does not exist or may have moved.',
     canonical: item ? `https://synergybrix.com/work/${item.slug}` : 'https://synergybrix.com/404',
   })
 
@@ -672,7 +744,7 @@ function ProcessPage() {
       <div className="mt-10 rounded-3xl border border-emerald-200 bg-emerald-50 p-8">
         <h3 className="text-2xl font-semibold text-slate-900">Discovery and planning are central to every project.</h3>
         <p className="mt-4 max-w-3xl text-slate-700">We value clear requirements, realistic milestones, practical design decisions, and sustainable implementation choices that help your teams stay aligned from start to finish.</p>
-        <LinkButton to="/contact" variant="primary" className="mt-6">Start a Project</LinkButton>
+        <LinkButton to={GOOGLE_FORM_URL} variant="primary" className="mt-6">Start a Project</LinkButton>
       </div>
     </PageShell>
   )
@@ -700,6 +772,8 @@ function TechnologiesPage() {
 }
 
 
+
+
 function InsightsPage() {
   usePageMeta(pageMeta.insights)
 
@@ -719,8 +793,8 @@ function InsightDetailPage() {
   const post = blogPosts.find((item) => item.slug === slug)
 
   usePageMeta({
-    title: post ? `${post.title} | Synergy Brix` : pageMeta.notFound.title,
-    description: post ? post.excerpt : pageMeta.notFound.description,
+    title: post ? `${post.title} | Synergy Brix` : 'Page Not Found | Synergy Brix',
+    description: post ? post.excerpt : 'The insight you are looking for could not be found.',
     canonical: post ? `https://synergybrix.com/insights/${post.slug}` : 'https://synergybrix.com/404',
   })
 
@@ -743,98 +817,178 @@ function InsightDetailPage() {
 function ContactPage() {
   usePageMeta(pageMeta.contact)
 
-  const form = useForm<ContactFormValues>({
-    resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: '',
-      company: '',
-      email: '',
-      phone: '',
-      projectType: '',
-      budget: '',
-      timeline: '',
-      message: '',
-    },
-  })
+  return (
+    <section className="relative overflow-hidden bg-slate-950 text-white">
+      <div className="mesh-bg absolute inset-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.20),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.10),transparent_30%)]" />
+      <Container className="relative grid items-center gap-14 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 lg:py-28">
+        <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }} className="relative">
+          <motion.div variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.45 }} className="section-tag inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
+            <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" />
+            Let&apos;s start a project
+          </motion.div>
 
-  const [submitState, setSubmitState] = useState<{ success: boolean; message: string } | null>(null)
+          <motion.h1 variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-6 max-w-2xl text-4xl font-semibold leading-[1.04] tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
+            Let&apos;s Build Something <span className="bg-gradient-to-r from-emerald-200 via-emerald-300 to-teal-200 bg-clip-text text-transparent">That Matters.</span>
+          </motion.h1>
 
-  async function onSubmit(values: ContactFormValues) {
-    const result = await submitContactForm(values)
-    setSubmitState(result)
-    if (result.success) {
-      form.reset()
-    }
+          <motion.p variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.55 }} className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+            Tell us about your goals, challenge, or opportunity. Share a few details and we&apos;ll get back to you with the right next steps.
+          </motion.p>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.55 }} className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <a
+              href={GOOGLE_FORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-emerald-500 px-7 py-4 text-base font-semibold text-emerald-950 shadow-[0_18px_45px_rgba(16,185,129,0.32)] transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-[0_22px_55px_rgba(16,185,129,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-200"
+            >
+              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              <span className="relative">Start a Project</span>
+              <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1" />
+            </a>
+            <span className="text-sm text-slate-400">Opens our project enquiry form in a new tab</span>
+          </motion.div>
+
+          <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6, delay: 0.1 }} className="mt-12 grid gap-4 sm:grid-cols-2">
+            <ContactInfoCard
+              icon={<Mail size={18} />}
+              label="Email"
+              value="hello@synergybrix.com"
+              href="mailto:hello@synergybrix.com"
+            />
+            <ContactInfoCard
+              icon={<MapPin size={18} />}
+              label="Location"
+              value="India • Remote-ready"
+            />
+            <ContactInfoCard
+              icon={<FaLinkedinIn size={16} />}
+              label="LinkedIn"
+              value="Connect on LinkedIn"
+              href="https://www.linkedin.com"
+            />
+            <ContactInfoCard
+              icon={<FaGithub size={16} />}
+              label="GitHub"
+              value="View on GitHub"
+              href="https://github.com"
+            />
+          </motion.div>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.75, ease: 'easeOut' }} className="relative">
+          <ContactNetwork />
+        </motion.div>
+      </Container>
+    </section>
+  )
+}
+
+function ContactInfoCard({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href?: string }) {
+  const content = (
+    <>
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300/20 bg-emerald-500/10 text-emerald-200">
+        {icon}
+      </span>
+      <span className="flex flex-col">
+        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">{label}</span>
+        <span className="text-sm font-medium text-white">{value}</span>
+      </span>
+    </>
+  )
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target={href.startsWith('http') ? '_blank' : undefined}
+        rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300/30 hover:bg-white/[0.07]"
+      >
+        {content}
+      </a>
+    )
   }
 
   return (
-    <PageShell title="Let's Build Something That Matters." subtitle="Tell us about your goals, challenge, or opportunity." description="Share a few details about your project and we will respond with the right next steps.">
-      <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="rounded-3xl border border-slate-200 bg-slate-900 p-8 text-white shadow-sm">
-          <h3 className="text-2xl font-semibold">Start the conversation</h3>
-          <p className="mt-3 text-slate-300">We help businesses define the right technology approach and move from concept to dependable delivery.</p>
-          <ul className="mt-8 space-y-4 text-sm text-slate-200">
-            <li className="flex items-center gap-3"><Mail size={16} className="text-emerald-300" /> hello@synergybrix.com</li>
-            <li className="flex items-center gap-3"><Phone size={16} className="text-emerald-300" /> +91 00000 00000</li>
-            <li className="flex items-center gap-3"><MapPin size={16} className="text-emerald-300" /> India • Remote-ready</li>
-          </ul>
+    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+      {content}
+    </div>
+  )
+}
+
+const contactNetworkNodes = [
+  { label: 'Discovery', icon: Compass, position: 'contact-node-discovery' },
+  { label: 'Strategy', icon: Sparkles, position: 'contact-node-strategy' },
+  { label: 'Engineering', icon: Code2, position: 'contact-node-engineering' },
+  { label: 'Launch', icon: Rocket, position: 'contact-node-launch' },
+  { label: 'Email', icon: Mail, position: 'contact-node-email' },
+  { label: 'Support', icon: Headphones, position: 'contact-node-support' },
+]
+
+const contactNetworkPaths = [
+  'M240 220 C195 180 150 140 105 105',
+  'M260 220 C310 180 360 140 405 105',
+  'M225 250 C170 270 125 300 90 320',
+  'M275 250 C335 285 380 320 425 345',
+  'M235 265 C215 320 185 370 160 410',
+  'M265 265 C300 320 340 370 370 410',
+]
+
+const contactNetworkParticles = [
+  { x: 240, y: 220 },
+  { x: 260, y: 220 },
+  { x: 225, y: 250 },
+  { x: 275, y: 250 },
+  { x: 235, y: 265 },
+  { x: 265, y: 265 },
+]
+
+function ContactNetwork() {
+  return (
+    <div className="contact-network" aria-label="Synergy Brix project connection network">
+      <div className="contact-network-grid" />
+      <div className="contact-network-aurora contact-network-aurora-one" />
+      <div className="contact-network-aurora contact-network-aurora-two" />
+      <svg className="contact-network-links" viewBox="0 0 500 460" role="img" aria-label="Connections between your goals and Synergy Brix capabilities">
+        <defs>
+          <linearGradient id="contact-network-line" x1="0" x2="1">
+            <stop stopColor="#34d399" stopOpacity=".12" />
+            <stop offset=".5" stopColor="#6ee7b7" stopOpacity=".85" />
+            <stop offset="1" stopColor="#34d399" stopOpacity=".12" />
+          </linearGradient>
+        </defs>
+        {contactNetworkPaths.map((path) => (
+          <path key={path} className="contact-network-link" d={path} />
+        ))}
+        {contactNetworkParticles.map((p, index) => (
+          <circle key={index} className={`contact-network-particle contact-particle-${index}`} cx={p.x} cy={p.y} r={3} />
+        ))}
+      </svg>
+
+      <div className="contact-network-core">
+        <div className="contact-network-core-orbit" />
+        <div className="contact-network-core-inner">
+          <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-emerald-200/80">Connect with</span>
+          <span className="mt-1 block text-base font-semibold tracking-[-0.04em] text-white">Synergy Brix</span>
+          <span className="mt-2 flex items-center justify-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-emerald-300">
+            <i className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Project hub
+          </span>
         </div>
-
-        <form onSubmit={form.handleSubmit(onSubmit)} className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <div className="grid gap-5 md:grid-cols-2">
-            <Field label="Name" error={form.formState.errors.name?.message}>
-              <input {...form.register('name')} className="input" placeholder="Your name" />
-            </Field>
-            <Field label="Company" error={form.formState.errors.company?.message}>
-              <input {...form.register('company')} className="input" placeholder="Your company" />
-            </Field>
-            <Field label="Email" error={form.formState.errors.email?.message}>
-              <input {...form.register('email')} type="email" className="input" placeholder="name@company.com" />
-            </Field>
-            <Field label="Phone" error={form.formState.errors.phone?.message}>
-              <input {...form.register('phone')} className="input" placeholder="+91 ..." />
-            </Field>
-            <Field label="Project Type" error={form.formState.errors.projectType?.message}>
-              <select {...form.register('projectType')} className="input">
-                <option value="">Select project type</option>
-                {contactTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Budget Range" error={form.formState.errors.budget?.message}>
-              <select {...form.register('budget')} className="input">
-                <option value="">Select budget</option>
-                {budgetRanges.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Timeline" error={form.formState.errors.timeline?.message} className="md:col-span-2">
-              <select {...form.register('timeline')} className="input">
-                <option value="">Select timeline</option>
-                {timelines.map((item) => (
-                  <option key={item} value={item}>{item}</option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Message" error={form.formState.errors.message?.message} className="md:col-span-2">
-              <textarea {...form.register('message')} className="input min-h-32" placeholder="Tell us what you're trying to build, improve, or automate." />
-            </Field>
-          </div>
-
-          {submitState && (
-            <div className={`mt-5 rounded-2xl px-4 py-3 text-sm ${submitState.success ? 'bg-emerald-50 text-emerald-900' : 'bg-red-50 text-red-700'}`}>
-              {submitState.message}
-            </div>
-          )}
-
-          <button type="submit" className="mt-6 inline-flex items-center justify-center rounded-full bg-emerald-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-emerald-800 disabled:opacity-50" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? 'Sending...' : 'Send Message'}
-          </button>
-        </form>
       </div>
-    </PageShell>
+
+      {contactNetworkNodes.map(({ label, icon: Icon, position }) => (
+        <div key={label} className={`contact-network-node ${position}`}>
+          <div className="contact-network-node-icon"><Icon size={15} strokeWidth={1.8} /></div>
+          <span>{label}</span>
+        </div>
+      ))}
+
+      <div className="contact-network-caption">
+        <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Discovery · Strategy · Build · Launch
+      </div>
+    </div>
   )
 }
 
@@ -904,7 +1058,11 @@ function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cookies' }) {
 }
 
 function NotFoundPage() {
-  usePageMeta(pageMeta.notFound)
+  usePageMeta({
+    title: 'Page Not Found | Synergy Brix',
+    description: 'The page you requested does not exist or may have moved.',
+    canonical: 'https://synergybrix.com/404',
+  })
 
   return (
     <PageShell title="404" subtitle="This page could not be found." description="The page you requested does not exist or may have moved.">
@@ -967,8 +1125,9 @@ function SectionColumn({ title, body }: { title: string; body: string }) {
 
 function CTASection({ title, description, primaryLabel, secondaryLabel, primaryHref, secondaryHref }: { title: string; description: string; primaryLabel: string; secondaryLabel: string; primaryHref: string; secondaryHref: string }) {
   return (
-    <section className="border-y border-emerald-100 bg-emerald-900 text-white">
-      <Container className="flex flex-col items-center justify-between gap-8 py-16 text-center lg:flex-row lg:text-left">
+    <section className="cta-grid relative overflow-hidden border-y border-emerald-700/50 bg-emerald-950 text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(52,211,153,0.20),transparent_28%)]" />
+      <Container className="relative flex flex-col items-center justify-between gap-8 py-16 text-center lg:flex-row lg:text-left">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-200">Let’s talk</p>
           <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{title}</h2>
@@ -987,7 +1146,7 @@ function ServiceCard({ service, detail = false }: { service: (typeof services)[n
   return (
     <motion.article initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.35 }} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg">
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-900"><Code2 size={18} /></div>
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-900 transition duration-300 group-hover:scale-105 group-hover:bg-emerald-100"><Code2 size={18} /></div>
         <span className="rounded-full border border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Service</span>
       </div>
       <h3 className="mt-6 text-xl font-semibold text-slate-900">{service.title}</h3>
@@ -998,7 +1157,7 @@ function ServiceCard({ service, detail = false }: { service: (typeof services)[n
         ))}
       </div>
       <Link to={detail ? `/services/${service.slug}` : `/services/${service.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Learn more <ArrowRight size={16} />
+        Learn more <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
       </Link>
     </motion.article>
   )
@@ -1006,8 +1165,8 @@ function ServiceCard({ service, detail = false }: { service: (typeof services)[n
 
 function IndustryCard({ industry }: { industry: { title: string; summary: string } }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-900"><Building2 size={18} /></div>
+    <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-md">
+      <div className="mb-4 inline-flex rounded-xl bg-emerald-50 p-3 text-emerald-900 transition duration-300 group-hover:scale-105"><Building2 size={18} /></div>
       <h3 className="text-xl font-semibold text-slate-900">{industry.title}</h3>
       <p className="mt-3 text-sm leading-7 text-slate-600">{industry.summary}</p>
     </div>
@@ -1016,7 +1175,10 @@ function IndustryCard({ industry }: { industry: { title: string; summary: string
 
 function CaseStudyCard({ item }: { item: (typeof caseStudies)[number] }) {
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <article className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg">
+      <div className="mb-6 h-28 rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ecfdf5_55%,#d1fae5_100%)] p-4">
+        <div className="h-2 w-20 rounded-full bg-emerald-900/15" /><div className="mt-4 grid grid-cols-3 gap-2"><div className="h-12 rounded-md bg-white shadow-sm" /><div className="h-12 rounded-md bg-emerald-600/15" /><div className="h-12 rounded-md bg-white shadow-sm" /></div>
+      </div>
       <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{item.label}</div>
       <h3 className="mt-3 text-2xl font-semibold text-slate-900">{item.title}</h3>
       <p className="mt-3 text-slate-600">{item.overview}</p>
@@ -1026,7 +1188,7 @@ function CaseStudyCard({ item }: { item: (typeof caseStudies)[number] }) {
         ))}
       </div>
       <Link to={`/work/${item.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Read project detail <ArrowRight size={16} />
+        View case study <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
       </Link>
     </article>
   )
@@ -1060,23 +1222,26 @@ function FAQAccordion({ question, answer, defaultOpen = false }: { question: str
   )
 }
 
-function Field({ label, error, children, className = '' }: { label: string; error?: string; children: React.ReactNode; className?: string }) {
-  return (
-    <label className={`block ${className}`}>
-      <span className="mb-2 block text-sm font-medium text-slate-700">{label}</span>
-      {children}
-      {error && <span className="mt-2 block text-sm text-red-600">{error}</span>}
-    </label>
-  )
+function isExternalHref(href: string) {
+  return /^(https?:)?\/\//i.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 }
 
 function LinkButton({ to, children, variant = 'primary', className = '', icon, fullWidth = false, onClick }: { to: string; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'primary-light' | 'secondary-light'; className?: string; icon?: React.ReactNode; fullWidth?: boolean; onClick?: () => void }) {
-  const base = 'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 hover:-translate-y-0.5 hover:shadow-lg'
+  const base = 'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 hover:-translate-y-0.5 hover:shadow-lg'
   const styles = {
     primary: 'bg-emerald-700 text-white shadow-[0_12px_30px_rgba(5,150,105,0.25)] hover:bg-emerald-600',
     secondary: 'border border-slate-200 bg-white text-slate-900 hover:border-emerald-200 hover:text-emerald-900',
     'primary-light': 'bg-white text-emerald-900 hover:bg-emerald-50',
     'secondary-light': 'border border-white/25 bg-white/5 text-white hover:border-emerald-300/50 hover:bg-white/10',
+  }
+
+  if (isExternalHref(to)) {
+    return (
+      <a href={to} target="_blank" rel="noopener noreferrer" onClick={onClick} className={`${base} ${styles[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}>
+        {children}
+        {icon}
+      </a>
+    )
   }
 
   return (
@@ -1109,8 +1274,8 @@ function Container({ children, className = '' }: { children: React.ReactNode; cl
   return <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 }
 
-function Section({ children, background = 'white' }: { children: React.ReactNode; background?: 'white' | 'soft' }) {
-  return <section className={background === 'soft' ? 'bg-slate-50 py-20' : 'bg-white py-20'}>{children}</section>
+function Section({ children, background = 'white', id }: { children: React.ReactNode; background?: 'white' | 'soft'; id?: string }) {
+  return <section id={id} className={background === 'soft' ? 'bg-slate-50 py-20' : 'bg-white py-20'}>{children}</section>
 }
 
 function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
