@@ -331,8 +331,8 @@ export const footerLinks = {
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },
     { label: 'Contact', to: '/contact' },
-    { label: 'Privacy Policy', to: '/privacy' },
-    { label: 'Terms & Conditions', to: '/terms' },
+   // { label: 'Privacy Policy', to: '/privacy' },
+    // { label: 'Terms & Conditions', to: '/terms' },
   ],
   social: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com' },
