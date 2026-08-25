@@ -1,0 +1,114 @@
+Act as a senior React frontend engineer and premium UI/UX designer.
+
+Inspect my existing **Synergy Brix React/Vite website** first, then directly improve the existing code. **Do not rebuild it from scratch and do not remove existing content or functionality.**
+
+### Goal
+Make the entire website look **premium, modern, polished, and professional**, like a high-end B2B software/technology company.
+
+Keep the existing brand:
+
+- Dark navy
+- Emerald green
+- White
+- Existing Synergy Brix logo
+- Existing sections and content
+
+### Improve ALL sections
+Upgrade the:
+
+- Navbar
+- Hero
+- Why Synergy Brix
+- Services
+- Problems We Solve / Solutions
+- Industries
+- Work / Projects
+- About
+- CTA
+- Footer
+
+### Navbar
+
+- Make it sticky and premium.
+- Add smooth scrolling.
+- Add **active navigation highlighting**.
+- When Services is clicked, smoothly scroll to Services and highlight **Services**.
+- Implement scroll-spy using `IntersectionObserver` so the active nav item changes automatically while scrolling.
+- Add mobile hamburger navigation.
+
+### Animations
+Add subtle, premium animations:
+
+- Page-load fade/slide animations
+- Scroll-reveal animations for sections
+- Staggered card animations
+- Card hover lift
+- Icon hover effects
+- Button/arrow animations
+- Navbar transitions
+- Subtle hero/dashboard animations
+Keep animations smooth and professional — **no excessive bouncing, flashing, particles, or distracting effects**.
+
+### Visual Design
+Improve:
+
+- Typography
+- Spacing
+- Section hierarchy
+- Card design
+- Borders
+- Shadows
+- Background grid
+- Subtle gradients
+- Hover states
+- Buttons
+- Icons
+Make the website feel **premium SaaS + enterprise software + modern technology consultancy**.
+
+Do not overuse glassmorphism or gradients.
+
+### Services
+Make the Services section especially strong.
+
+Service cards should have:
+
+- Icon
+- Title
+- Description
+- Technology tags
+- Learn More →
+On hover:
+
+- Slight lift
+- Emerald border/accent
+- Subtle shadow
+- Icon animation
+- Arrow movement
+
+### Responsive
+Ensure the entire website works perfectly on:
+
+- Desktop
+- Tablet
+- Mobile
+No horizontal scrolling.
+
+### Important
+
+- Reuse existing components and content.
+- Don't invent fake clients, statistics, awards, or testimonials.
+- Don't add unnecessary dependencies.
+- Use existing animation libraries if available.
+- Otherwise use CSS + IntersectionObserver.
+- Respect `prefers-reduced-motion`.
+- Keep the code clean and reusable.
+
+### Final step
+After making the changes:
+
+1. Check every section.
+2. Fix any visual inconsistencies.
+3. Ensure navigation and Services highlighting work.
+4. Ensure mobile layout works.
+5. Run the build and fix any errors.
+**Actually modify the files in the workspace. Do not just explain what should be changed.**
