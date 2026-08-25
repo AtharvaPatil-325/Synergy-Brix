@@ -62,7 +62,6 @@ function AppShell() {
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/privacy" element={<LegalPage type="privacy" />} />
           <Route path="/terms" element={<LegalPage type="terms" />} />
-          <Route path="/cookies" element={<LegalPage type="cookies" />} />
           <Route path="/404" element={<NotFoundPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
@@ -226,24 +225,24 @@ function Footer() {
               <li className="flex items-center gap-2"><Phone size={16} className="text-emerald-300" /> +91 00000 00000</li>
               <li className="flex items-center gap-2"><MapPin size={16} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
-           <div className="mt-5 flex gap-3">
-  {footerLinks.social.map((social) => (
-    <a
-      key={social.label}
-      href={social.href}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
-      aria-label={social.label}
-    >
-      {social.label.toLowerCase().includes("linkedin") ? (
-        <FaLinkedinIn size={18} />
-      ) : (
-        <FaGithub size={18} />
-      )}
-    </a>
-  ))}
-</div>
+            <div className="mt-5 flex gap-3">
+              {footerLinks.social.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
+                  aria-label={social.label}
+                >
+                  {social.label.toLowerCase().includes("linkedin") ? (
+                    <FaLinkedinIn size={18} />
+                  ) : (
+                    <FaGithub size={18} />
+                  )}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
         <div className="mt-10 border-t border-slate-800 pt-6 text-sm text-slate-400">
@@ -339,7 +338,7 @@ function HomePage() {
 
       <Section>
         <Container>
-          <SectionHeading eyebrow="Business value" title="Problems we solve" description="The goal is not to add technology for technology's sake. It is to remove friction and improve how the business runs." />
+          <SectionHeading eyebrow="Business value" title="Problems we solve" description="We don’t add technology for the sake of it. We solve real business challenges by removing friction and improving operations." />
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             {homeProblems.map((problem) => (
               <div key={problem.question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:border-emerald-200 hover:shadow-md">
@@ -1256,11 +1255,10 @@ function LinkButton({ to, children, variant = 'primary', className = '', icon, f
 function BrandLogo({ dark = false, className = '' }: { dark?: boolean; className?: string }) {
   return (
     <div
-      className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${
-        dark
-          ? 'bg-white p-1 shadow-sm ring-1 ring-white/20'
-          : 'bg-white p-1 shadow-sm ring-1 ring-slate-200/80'
-      } ${className}`}
+      className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${dark
+        ? 'bg-white p-1 shadow-sm ring-1 ring-white/20'
+        : 'bg-white p-1 shadow-sm ring-1 ring-slate-200/80'
+        } ${className}`}
       aria-label="Synergy Brix logo"
     >
       <img
