@@ -210,7 +210,7 @@ function Footer() {
           </div>
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">Quick Links</h3>
-            <ul className="grid grid-cols-2 gap-2 text-sm text-slate-300">
+            <ul className="flex flex-row flex-wrap items-center gap-4 text-sm text-slate-300">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.to}>
                   <Link to={link.to} className="transition hover:text-white">{link.label}</Link>
@@ -1046,9 +1046,56 @@ function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cookies' }) {
   return (
     <PageShell title={content.title} subtitle="Legal placeholder content for future review." description={content.description}>
       <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        {content.sections.map((section) => (
-          <p key={section} className="mt-4 text-base leading-8 text-slate-700 first:mt-0">{section}</p>
-        ))}
+        {type === 'privacy' ? (
+          <div>
+            <p className="text-sm font-semibold">Last Updated: August 2026</p>
+            <p className="mt-4 text-base leading-8 text-slate-700">Synergy Brix respects your privacy. This Privacy Policy explains how we collect and use information provided through our website and project enquiry forms.</p>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Information We Collect</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">We may collect:</p>
+            <ul className="mt-2 list-disc pl-6 text-slate-700">
+              <li>Name</li>
+              <li>Company name</li>
+              <li>Email address</li>
+              <li>Phone number</li>
+              <li>Project requirements</li>
+              <li>Other information you voluntarily provide</li>
+            </ul>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">How We Use Your Information</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">We use this information to:</p>
+            <ul className="mt-2 list-disc pl-6 text-slate-700">
+              <li>Respond to enquiries</li>
+              <li>Understand project requirements</li>
+              <li>Provide quotations and services</li>
+              <li>Communicate with you</li>
+              <li>Improve our services</li>
+            </ul>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Google Forms</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">Project enquiries may be submitted through Google Forms. Information submitted through Google Forms may be processed and stored by Google according to Google's privacy policies.</p>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Information Sharing</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">We do not sell or rent your personal information. Information may be shared with service providers when necessary to operate our business or provide requested services, or when required by law.</p>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Data Security</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">We take reasonable measures to protect your information, but no online system can be guaranteed to be completely secure.</p>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Third-Party Links</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">Our website may contain links to third-party websites. We are not responsible for their privacy practices.</p>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Updates</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700">We may update this Privacy Policy when necessary. Changes will be posted on this page.</p>
+
+            <h3 className="mt-6 text-lg font-semibold text-slate-900">Contact</h3>
+            <p className="mt-3 text-base leading-8 text-slate-700"><strong>Synergy Brix</strong><br />Email: <strong>info@synergybrix</strong><br />Phone: <strong>+91 0000 00000</strong><br />Location: <strong>India</strong></p>
+          </div>
+        ) : (
+          content.sections.map((section) => (
+            <p key={section} className="mt-4 text-base leading-8 text-slate-700 first:mt-0">{section}</p>
+          ))
+        )}
+
         <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           Legal review required before final publication.
         </div>
