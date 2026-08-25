@@ -42,6 +42,44 @@ img {
   background: rgba(11, 93, 75, 0.18);
 }
 
+.mesh-bg {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle at center, black 25%, transparent 100%);
+}
+
+.hero-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), transparent 40%, rgba(59, 130, 246, 0.08));
+  pointer-events: none;
+}
+
+.section-tag {
+  letter-spacing: 0.18em;
+}
+
+.floating-card {
+  animation: float-card 6s ease-in-out infinite;
+}
+
+.floating-card-two {
+  animation-delay: 1.4s;
+}
+
+@keyframes float-card {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

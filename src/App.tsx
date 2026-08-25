@@ -5,6 +5,7 @@ import { ArrowRight, ChevronDown, Check, Menu, X, ShieldCheck, Layers3, Building
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
+import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import {
   blogPosts,
   caseStudies,
@@ -89,12 +90,12 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-emerald-200/70 bg-white/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-emerald-200/60 bg-slate-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link to="/" aria-label="Synergy Brix home" className="flex items-center gap-3">
           <BrandLogo />
           <div className="leading-tight">
-            <div className="text-lg font-semibold tracking-tight text-emerald-900">Synergy Brix</div>
+            <div className="text-lg font-semibold tracking-tight text-white">Synergy Brix</div>
           </div>
         </Link>
 
@@ -103,12 +104,12 @@ function Navbar() {
             if (item.children) {
               return (
                 <div key={item.label} className="group relative">
-                  <button type="button" className="flex items-center gap-1 text-sm font-medium text-slate-700 transition hover:text-emerald-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+                  <button type="button" className="flex items-center gap-1 text-sm font-medium text-slate-200 transition hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300">
                     {item.label} <ChevronDown size={14} />
                   </button>
-                  <div className="invisible absolute left-0 top-full mt-4 w-72 rounded-2xl border border-slate-200 bg-white p-3 opacity-0 shadow-xl transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                  <div className="invisible absolute left-0 top-full mt-4 w-72 rounded-2xl border border-slate-700/70 bg-slate-900/95 p-3 opacity-0 shadow-[0_16px_52px_rgba(15,23,42,0.45)] transition-all duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                     {item.children.map((child) => (
-                      <Link key={child.to} to={child.to} className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-900">
+                      <Link key={child.to} to={child.to} className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white">
                         {child.label}
                       </Link>
                     ))}
@@ -122,7 +123,7 @@ function Navbar() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `text-sm font-medium transition ${isActive ? 'text-emerald-900' : 'text-slate-700 hover:text-emerald-900'}`
+                  `text-sm font-medium transition ${isActive ? 'text-white' : 'text-slate-300 hover:text-white'}`
                 }
               >
                 {item.label}
@@ -137,7 +138,7 @@ function Navbar() {
 
         <button
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 shadow-sm lg:hidden"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-200 shadow-sm lg:hidden"
           aria-expanded={isOpen}
           aria-label="Open menu"
           onClick={() => setIsOpen((value) => !value)}
@@ -147,20 +148,20 @@ function Navbar() {
       </div>
 
       {isOpen && (
-        <div className="border-t border-slate-200 bg-white lg:hidden">
+        <div className="border-t border-slate-700 bg-slate-950 lg:hidden">
           <div className="mx-auto max-w-7xl space-y-2 px-4 py-4 sm:px-6">
             {navItems.map((item) =>
               item.children ? (
                 <div key={item.label} className="space-y-2">
-                  <div className="px-2 py-2 text-sm font-semibold text-slate-800">{item.label}</div>
+                  <div className="px-2 py-2 text-sm font-semibold text-slate-200">{item.label}</div>
                   {item.children.map((child) => (
-                    <Link key={child.to} to={child.to} className="block rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-900" onClick={() => setIsOpen(false)}>
+                    <Link key={child.to} to={child.to} className="block rounded-xl px-3 py-2 text-sm text-slate-300 hover:bg-slate-900 hover:text-white" onClick={() => setIsOpen(false)}>
                       {child.label}
                     </Link>
                   ))}
                 </div>
               ) : (
-                <NavLink key={item.to} to={item.to} className={({ isActive }) => `block rounded-xl px-2 py-2 text-sm font-medium ${isActive ? 'bg-emerald-50 text-emerald-900' : 'text-slate-700'}`} onClick={() => setIsOpen(false)}>
+                <NavLink key={item.to} to={item.to} className={({ isActive }) => `block rounded-xl px-2 py-2 text-sm font-medium ${isActive ? 'bg-slate-900 text-white' : 'text-slate-300'}`} onClick={() => setIsOpen(false)}>
                   {item.label}
                 </NavLink>
               ),
@@ -204,17 +205,28 @@ function Footer() {
           <div>
             <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">Connect</h3>
             <ul className="space-y-3 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><Mail size={16} className="text-emerald-300" /> hello@synergybrix.com</li>
+              <li className="flex items-center gap-2"><Mail size={16} className="text-emerald-300" /> @synergybrix.com</li>
               <li className="flex items-center gap-2"><Phone size={16} className="text-emerald-300" /> +91 00000 00000</li>
               <li className="flex items-center gap-2"><MapPin size={16} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
-            <div className="mt-5 flex gap-3">
-              {footerLinks.social.map((social) => (
-                <a key={social.label} href={social.href} target="_blank" rel="noreferrer" className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200" aria-label={social.label}>
-                  <ArrowUpRight size={16} />
-                </a>
-              ))}
-            </div>
+           <div className="mt-5 flex gap-3">
+  {footerLinks.social.map((social) => (
+    <a
+      key={social.label}
+      href={social.href}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
+      aria-label={social.label}
+    >
+      {social.label.toLowerCase().includes("linkedin") ? (
+        <FaLinkedinIn size={18} />
+      ) : (
+        <FaGithub size={18} />
+      )}
+    </a>
+  ))}
+</div>
           </div>
         </div>
         <div className="mt-10 border-t border-slate-800 pt-6 text-sm text-slate-400">
@@ -230,63 +242,72 @@ function HomePage() {
 
   return (
     <>
-      <section className="bg-gradient-to-br from-emerald-50 via-white to-emerald-100/50">
-        <Container className="grid items-center gap-10 py-16 lg:grid-cols-[1.15fr_0.85fr] lg:py-24">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-sm font-medium text-emerald-900 shadow-sm">
-              <Sparkles size={14} className="text-emerald-700" />
+      <section className="relative overflow-hidden bg-slate-950">
+        <div className="mesh-bg absolute inset-0" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_25%)]" />
+        <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
+            <div className="section-tag mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
+              <Sparkles size={14} className="text-emerald-300" />
               Technology built for real business needs
             </div>
-            <h1 className="max-w-xl text-4xl font-semibold tracking-[-0.06em] text-slate-950 sm:text-5xl lg:text-6xl">
-              Build Better. Automate Smarter. Scale Faster.
+            <h1 className="max-w-2xl text-4xl font-semibold tracking-[-0.07em] text-white sm:text-5xl lg:text-6xl">
+              Building digital solutions that move your business forward.
             </h1>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-700">
-              Synergy Brix builds reliable software, web applications, APIs, automation systems, and digital solutions that help businesses operate smarter and grow with confidence.
+            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+              Custom software, business automation, web applications, and digital systems designed around the way your business actually works.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <LinkButton to="/contact" variant="primary" icon={<ArrowRight size={18} />}>Start a Project</LinkButton>
-              <LinkButton to="/services" variant="secondary">Explore Our Services</LinkButton>
+              <LinkButton to="/services" variant="secondary-light">Explore Our Services</LinkButton>
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
+              {['Custom software', 'Automation', 'APIs', 'Cloud', 'Dashboards'].map((item) => (
+                <span key={item} className="rounded-full border border-slate-700/80 bg-slate-900/40 px-3 py-1.5 backdrop-blur-sm">
+                  {item}
+                </span>
+              ))}
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.6 }} className="relative">
-            <div className="relative overflow-hidden rounded-[32px] border border-emerald-200 bg-white p-5 shadow-[0_30px_80px_rgba(7,31,26,0.12)]">
-              <div className="absolute -right-6 top-8 h-28 w-28 rounded-full bg-amber-100/60 blur-2xl" />
-              <div className="absolute -left-4 bottom-8 h-40 w-40 rounded-full bg-emerald-100/80 blur-2xl" />
-              <div className="relative flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, ease: 'easeOut' }} className="relative">
+            <div className="hero-shell relative overflow-hidden rounded-[32px] border border-emerald-300/20 bg-white/5 p-5 shadow-[0_34px_100px_rgba(15,23,42,0.45)] backdrop-blur-xl">
+              <div className="absolute -right-6 top-8 h-28 w-28 rounded-full bg-emerald-300/30 blur-3xl" />
+              <div className="absolute -left-4 bottom-8 h-36 w-36 rounded-full bg-violet-400/20 blur-3xl" />
+              <div className="relative flex items-center justify-between rounded-2xl border border-slate-700/80 bg-slate-900/70 px-4 py-3 text-white">
                 <div>
-                  <div className="text-xs uppercase tracking-[0.2em] text-slate-500">System view</div>
-                  <div className="mt-2 text-xl font-semibold text-slate-900">Synergy Brix</div>
+                  <div className="text-[10px] uppercase tracking-[0.25em] text-slate-400">System view</div>
+                  <div className="mt-2 text-xl font-semibold text-white">Synergy Brix</div>
                 </div>
-                <div className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">Operational</div>
+                <div className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">Operational</div>
               </div>
 
               <div className="relative mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="rounded-2xl border border-slate-700/80 bg-slate-900/80 p-4 text-white shadow-inner shadow-slate-950/30">
                   <div className="mb-4 flex items-center justify-between">
-                    <div className="text-sm font-medium text-slate-600">Core services</div>
-                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
+                    <div className="text-sm font-medium text-slate-300">Core services</div>
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
                   </div>
                   <div className="space-y-3">
-                    <div className="h-9 rounded-xl bg-emerald-50" />
+                    <div className="h-9 rounded-xl bg-emerald-500/10" />
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="h-12 rounded-lg bg-slate-100" />
-                      <div className="h-12 rounded-lg bg-emerald-100" />
-                      <div className="h-12 rounded-lg bg-slate-100" />
+                      <div className="h-12 rounded-lg bg-slate-800" />
+                      <div className="h-12 rounded-lg bg-emerald-500/15" />
+                      <div className="h-12 rounded-lg bg-slate-800" />
                     </div>
-                    <div className="h-12 rounded-xl bg-slate-100" />
+                    <div className="h-12 rounded-xl bg-slate-800" />
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-950 p-4 text-white">
+                <div className="rounded-2xl border border-slate-700/80 bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950/70 p-4 text-white">
                   <div className="flex items-center justify-between text-sm text-slate-300">
                     <span>Delivery model</span>
-                    <span className="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">Live</span>
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-200">Live</span>
                   </div>
                   <div className="mt-5 space-y-3">
                     <div className="flex items-baseline justify-between">
                       <span className="text-3xl font-semibold text-white">84%</span>
-                      <span className="text-xs uppercase tracking-[0.2em] text-slate-400">workflows</span>
+                      <span className="text-[10px] uppercase tracking-[0.22em] text-slate-400">workflows</span>
                     </div>
                     <div className="space-y-2">
                       {[65, 78, 90].map((bar) => (
@@ -301,19 +322,21 @@ function HomePage() {
 
               <div className="relative mt-6 grid grid-cols-3 gap-3">
                 {[{ label: 'Custom', tone: 'emerald' }, { label: 'API', tone: 'slate' }, { label: 'Cloud', tone: 'amber' }].map((item) => (
-                  <div key={item.label} className={`rounded-2xl border p-3 ${item.tone === 'emerald' ? 'border-emerald-200 bg-emerald-50' : item.tone === 'amber' ? 'border-amber-200 bg-amber-50' : 'border-slate-200 bg-slate-50'}`}>
-                    <div className={`mb-2 inline-flex rounded-lg px-2 py-1 text-xs font-semibold ${item.tone === 'emerald' ? 'bg-white text-emerald-900' : item.tone === 'amber' ? 'bg-white text-amber-800' : 'bg-white text-slate-800'}`}>
+                  <div key={item.label} className={`rounded-2xl border p-3 ${item.tone === 'emerald' ? 'border-emerald-400/20 bg-emerald-500/10' : item.tone === 'amber' ? 'border-amber-400/20 bg-amber-500/10' : 'border-slate-600 bg-slate-800/70'}`}>
+                    <div className={`mb-2 inline-flex rounded-lg px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${item.tone === 'emerald' ? 'bg-white/10 text-emerald-100' : item.tone === 'amber' ? 'bg-white/10 text-amber-100' : 'bg-white/10 text-slate-200'}`}>
                       {item.label}
                     </div>
                     <div className="flex items-end gap-1">
-                      <div className="h-10 w-6 rounded-md bg-emerald-500/70" />
-                      <div className="h-14 w-6 rounded-md bg-slate-200" />
+                      <div className="h-10 w-6 rounded-md bg-emerald-400/80" />
+                      <div className="h-14 w-6 rounded-md bg-slate-700" />
                       <div className="h-8 w-6 rounded-md bg-amber-300/80" />
                     </div>
                   </div>
                 ))}
               </div>
             </div>
+           
+          
           </motion.div>
         </Container>
       </section>
@@ -1076,12 +1099,12 @@ function Field({ label, error, children, className = '' }: { label: string; erro
 }
 
 function LinkButton({ to, children, variant = 'primary', className = '', icon, fullWidth = false, onClick }: { to: string; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'primary-light' | 'secondary-light'; className?: string; icon?: React.ReactNode; fullWidth?: boolean; onClick?: () => void }) {
-  const base = 'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700'
+  const base = 'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 hover:-translate-y-0.5 hover:shadow-lg'
   const styles = {
-    primary: 'bg-emerald-900 text-white hover:bg-emerald-800',
+    primary: 'bg-emerald-700 text-white shadow-[0_12px_30px_rgba(5,150,105,0.25)] hover:bg-emerald-600',
     secondary: 'border border-slate-200 bg-white text-slate-900 hover:border-emerald-200 hover:text-emerald-900',
     'primary-light': 'bg-white text-emerald-900 hover:bg-emerald-50',
-    'secondary-light': 'border border-white/30 bg-transparent text-white hover:border-white hover:bg-white/10',
+    'secondary-light': 'border border-white/25 bg-white/5 text-white hover:border-emerald-300/50 hover:bg-white/10',
   }
 
   return (
@@ -1092,10 +1115,21 @@ function LinkButton({ to, children, variant = 'primary', className = '', icon, f
   )
 }
 
-function BrandLogo({ dark = false }: { dark?: boolean }) {
+function BrandLogo({ dark = false, className = '' }: { dark?: boolean; className?: string }) {
   return (
-    <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${dark ? 'bg-slate-900' : 'bg-emerald-900'} shadow-sm`} aria-label="Synergy Brix logo">
-      <img src="/assets/logo.png" className="h-7 w-7 object-contain" role="img" aria-label="Synergy Brix logo mark" alt="Synergy Brix logo mark" />
+    <div
+      className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${
+        dark
+          ? 'bg-white p-1 shadow-sm ring-1 ring-white/20'
+          : 'bg-white p-1 shadow-sm ring-1 ring-slate-200/80'
+      } ${className}`}
+      aria-label="Synergy Brix logo"
+    >
+      <img
+        src="/logo.png"
+        alt="Synergy Brix logo mark"
+        className="h-full w-full object-contain"
+      />
     </div>
   )
 }
@@ -1111,8 +1145,8 @@ function Section({ children, background = 'white' }: { children: React.ReactNode
 function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
   return (
     <div className="max-w-3xl">
-      <div className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">{eyebrow}</div>
-      <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">{title}</h2>
+      <div className="section-tag inline-flex rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">{eyebrow}</div>
+      <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">{title}</h2>
       <p className="mt-4 text-base leading-8 text-slate-600 md:text-lg">{description}</p>
     </div>
   )

@@ -68,10 +68,8 @@ export const navItems: NavItem[] = [
     ],
   },
   { label: 'Solutions', to: '/solutions' },
-  { label: 'Industries', to: '/industries' },
   { label: 'Work', to: '/work' },
   { label: 'About', to: '/about' },
-  { label: 'Insights', to: '/insights' },
 ]
 
 export const services: Service[] = [
@@ -342,7 +340,6 @@ export const footerLinks = {
     { label: 'Industries', to: '/industries' },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },
-    { label: 'Insights', to: '/insights' },
     { label: 'Careers', to: '/careers' },
     { label: 'Contact', to: '/contact' },
     { label: 'Privacy Policy', to: '/privacy' },
@@ -396,16 +393,17 @@ export const pageMeta = {
     description: 'Review Synergy Brix technology capabilities across frontend, backend, databases, APIs, security, cloud, and DevOps.',
     canonical: 'https://synergybrix.com/technologies',
   },
+  insights: {
+    title: 'Insights | Synergy Brix',
+    description: 'Explore practical insights on business software, automation, architecture, integrations, digital transformation, and technology strategy.',
+    canonical: 'https://synergybrix.com/insights',
+  },
   careers: {
     title: 'Careers | Synergy Brix',
     description: 'Discover the Synergy Brix engineering culture, learning approach, and opportunities to join the team.',
     canonical: 'https://synergybrix.com/careers',
   },
-  insights: {
-    title: 'Insights | Synergy Brix',
-    description: 'Read Synergy Brix insights on software development, business automation, APIs, cloud, databases, and digital transformation.',
-    canonical: 'https://synergybrix.com/insights',
-  },
+
   contact: {
     title: 'Contact | Synergy Brix',
     description: 'Tell Synergy Brix about your software challenge, automation idea, or business technology initiative.',
