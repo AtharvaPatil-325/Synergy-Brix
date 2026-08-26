@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { motion, AnimatePresence, useScroll, useTransform, useSpring, MotionConfig } from 'framer-motion'
-import { ArrowRight, ChevronDown, Check, Menu, X, ShieldCheck, Layers3, Building2, Sparkles, Code2, Mail, Phone, MapPin, Cloud, Database, BarChart3, Workflow, Globe2, Boxes, Compass, Rocket, Headphones } from 'lucide-react'
+import { ArrowRight, ChevronDown, Check, Menu, X, Building2, Sparkles, Code2, Mail, Phone, MapPin, Cloud, Database, BarChart3, Workflow, Globe2, Boxes, Compass, Rocket, Headphones } from 'lucide-react'
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import {
   blogPosts,
@@ -19,6 +19,7 @@ import {
   technologyGroups,
 } from './data/siteData'
 import { usePageMeta } from './hooks/usePageMeta'
+import { PointerParallax, HowWeWork, WhyChoose, TechnologyStack, FloatingContactButton } from './components/premium'
 
 const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfULk7ZMRSZ9krewdbd1elEYa8jLu0qmj3051MAKiYAqxCHcw/viewform?usp=header'
 
@@ -81,6 +82,7 @@ function AppShell() {
         </AnimatePresence>
       </main>
       <Footer />
+      <FloatingContactButton />
     </>
   )
 }
@@ -99,6 +101,14 @@ function Navbar() {
   const [isCompact, setIsCompact] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const location = useLocation()
+
+  useEffect(() => {
+    if (isOpen) {
+      const prev = document.body.style.overflow
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = prev }
+    }
+  }, [isOpen])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -317,42 +327,16 @@ function HomePage() {
             </motion.div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.75, ease: 'easeOut' }} className="relative">
-            <ArchitectureVisual />
-          </motion.div>
+          <PointerParallax strength={16} className="relative">
+            <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.75, ease: 'easeOut' }} className="relative">
+              <ArchitectureVisual />
+            </motion.div>
+          </PointerParallax>
         </Container>
         <ScrollIndicator />
       </section>
 
-      <section className="why-section relative overflow-hidden py-20 lg:py-24">
-        <div className="why-section-grid absolute inset-0" />
-        <div className="why-section-glow absolute -right-24 top-16 h-80 w-80 rounded-full" />
-        <Container className="relative grid items-center gap-12 lg:grid-cols-[.88fr_1.12fr]">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .2 }} transition={{ duration: .55 }} className="relative">
-            <div className="why-heading-line absolute -left-6 top-9 hidden h-24 w-px lg:block" />
-            <div className="section-tag inline-flex rounded-full border border-emerald-200 bg-white/75 px-3 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-emerald-800">Why Synergy Brix</div>
-            <h2 className="mt-5 max-w-xl text-4xl font-semibold leading-[1.04] tracking-[-.06em] text-slate-950 sm:text-5xl">Technology built around your business.</h2>
-            <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">We don&apos;t just build software. We understand the problem, design the right solution, and engineer technology around the way your business works.</p>
-            <div className="mt-8 flex items-center gap-3 text-sm font-medium text-emerald-900"><span className="h-px w-10 bg-emerald-500" />Business understanding, engineered into every layer.</div>
-          </motion.div>
-
-          <div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {[
-                { icon: Building2, number: '01', title: 'Business-first thinking', text: 'We start with business process, priorities, and outcomes.' },
-                { icon: Sparkles, number: '02', title: 'Custom solutions', text: 'Every solution is designed for your operational reality.' },
-                { icon: Layers3, number: '03', title: 'Scalable architecture', text: 'Systems are structured for growth, maintenance, and change.' },
-                { icon: ShieldCheck, number: '04', title: 'Security-conscious development', text: 'We build with access control and reliability in mind.' },
-              ].map(({ icon: Icon, number, title, text }, index) => (
-                <motion.article key={title} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={{ duration: .42, delay: index * .09 }} className="why-principle group">
-                  <div className="flex items-start justify-between gap-4"><div className="why-principle-icon"><Icon size={20} /></div><span className="text-xs font-semibold tracking-[.16em] text-emerald-700">{number}</span></div>
-                  <h3 className="mt-5 text-lg font-semibold text-slate-950">{title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
-                </motion.article>
-              ))}
-            </div>
-          </div>
-        </Container>
-      </section>
+      <WhyChoose />
 
       <Section id="services" background="soft">
         <Container>
@@ -412,38 +396,9 @@ function HomePage() {
         </Container>
       </Section>
 
-      <Section background="soft">
-        <Container>
-          <SectionHeading eyebrow="Technology" title="Capabilities built for modern software delivery" description="We choose technologies based on project requirements, scalability, maintainability, and business goals." />
-          <div className="mt-10 grid gap-6 lg:grid-cols-3">
-            {technologyGroups.map((group) => (
-              <div key={group.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="text-lg font-semibold text-slate-900">{group.title}</h3>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {group.items.map((item) => (
-                    <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-sm text-slate-700">{item}</span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </Section>
+      <TechnologyStack />
 
-      <Section>
-        <Container>
-          <SectionHeading eyebrow="Process" title="A disciplined delivery model" description="Our process keeps communication clear, technical decisions grounded, and milestones measurable from the beginning." />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {processSteps.map((step) => (
-              <div key={step.number} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{step.number}</div>
-                <h3 className="mt-3 text-xl font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-600">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </Section>
+      <HowWeWork />
 
       <Section id="about" background="soft">
         <Container>
@@ -472,8 +427,8 @@ function HomePage() {
 
       <div id="contact">
       <CTASection
-        title="Have a business problem worth solving?"
-        description="Tell us what you're trying to build, improve, or automate."
+        title="Have an Idea Worth Building?"
+        description="Turn your idea into a scalable digital solution with Synergy Brix."
         primaryLabel="Start a Project"
         secondaryLabel="Talk to Us"
         primaryHref={GOOGLE_FORM_URL}
@@ -1206,6 +1161,8 @@ function CTASection({ title, description, primaryLabel, secondaryLabel, primaryH
   return (
     <section className="cta-grid relative overflow-hidden border-y border-emerald-700/50 bg-emerald-950 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(52,211,153,0.20),transparent_28%)]" />
+      <motion.div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" animate={{ x: [0, 40, 0], y: [0, 30, 0] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }} />
+      <motion.div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-teal-400/15 blur-3xl" animate={{ x: [0, -30, 0], y: [0, -20, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />
       <Container className="relative flex flex-col items-center justify-between gap-8 py-16 text-center lg:flex-row lg:text-left">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-200">Let’s talk</p>
@@ -1223,21 +1180,22 @@ function CTASection({ title, description, primaryLabel, secondaryLabel, primaryH
 
 function ServiceCard({ service }: { service: (typeof services)[number] }) {
   return (
-    <motion.article initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.35 }} className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <motion.article initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.35 }} className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-emerald-50/50">
       <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-400/0 blur-2xl transition-colors duration-500 group-hover:bg-emerald-400/10" />
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-900 transition duration-300 group-hover:scale-110 group-hover:bg-emerald-100 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"><Code2 size={18} /></div>
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-900 transition duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-emerald-100 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"><Code2 size={18} /></div>
         <span className="rounded-full border border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Service</span>
       </div>
       <h3 className="mt-6 text-xl font-semibold text-slate-900">{service.title}</h3>
       <p className="mt-3 text-sm leading-7 text-slate-600">{service.short}</p>
+      <p className="mt-3 text-xs leading-6 text-slate-500 opacity-0 transition-opacity duration-500 group-hover:opacity-100">{service.problem}</p>
       <div className="mt-5 flex flex-wrap gap-2">
-        {service.technology.slice(0, 2).map((tech) => (
+        {service.technology.slice(0, 4).map((tech) => (
           <span key={tech} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700">{tech}</span>
         ))}
       </div>
       <Link to={`/services/${service.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Learn more <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
+        Explore Service <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
       </Link>
     </motion.article>
   )
