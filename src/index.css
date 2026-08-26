@@ -286,3 +286,107 @@ img {
   border-color: #0B5D4B;
   box-shadow: 0 0 0 4px rgba(11, 93, 75, 0.08);
 }
+
+/* Premium SaaS & Glassmorphism Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-panel-dark {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card-hover {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.35s ease,
+              box-shadow 0.35s ease,
+              background 0.35s ease;
+}
+
+.glass-card-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 20px 45px -10px rgba(16, 185, 129, 0.12), 0 0 25px rgba(16, 185, 129, 0.05);
+}
+
+/* Glowing Effects */
+.glow-emerald {
+  box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.25);
+}
+
+.glow-emerald-lg {
+  box-shadow: 0 0 60px -10px rgba(16, 185, 129, 0.35);
+}
+
+/* Ambient Floating Blobs */
+@keyframes blob-float-1 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -40px) scale(1.08); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+@keyframes blob-float-2 {
+  0%, 100% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-35px, 25px) scale(1.05); }
+  66% { transform: translate(25px, -35px) scale(0.92); }
+}
+
+.animate-blob-1 {
+  animation: blob-float-1 14s infinite ease-in-out;
+}
+
+.animate-blob-2 {
+  animation: blob-float-2 18s infinite ease-in-out;
+}
+
+/* Light Sweep effect on hover/focus */
+.relative-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.relative-sweep::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.75s ease;
+}
+
+.relative-sweep:hover::after {
+  left: 140%;
+}
+
+/* Shimmer badge animation */
+@keyframes shimmer-badge {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #a7f3d0 0%, #ffffff 50%, #a7f3d0 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer-badge 4s linear infinite;
+}
+
+/* Smooth Focus States */
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 2px solid #34d399 !important;
+  outline-offset: 3px !important;
+}

@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, MotionConfig } from 'framer-motion'
 import { ArrowRight, ChevronDown, Check, Menu, X, ShieldCheck, Layers3, Building2, Sparkles, Code2, Mail, Phone, MapPin, Cloud, Database, BarChart3, Workflow, Globe2, Boxes, Compass, Rocket, Headphones } from 'lucide-react'
 import { FaLinkedinIn, FaGithub } from "react-icons/fa";
 import {
@@ -24,9 +24,11 @@ const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfULk7ZMRSZ9kr
 
 function App() {
   return (
-    <BrowserRouter>
-      <AppShell />
-    </BrowserRouter>
+    <MotionConfig reducedMotion="user">
+      <BrowserRouter>
+        <AppShell />
+      </BrowserRouter>
+    </MotionConfig>
   )
 }
 
@@ -43,28 +45,40 @@ function AppShell() {
 
   return (
     <>
+      <Preloader />
+      <ScrollProgress />
       <Navbar />
       <main>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/services/:slug" element={<ServiceDetailPage />} />
-          <Route path="/solutions" element={<SolutionsPage />} />
-          <Route path="/industries" element={<IndustriesPage />} />
-          <Route path="/work" element={<WorkPage />} />
-          <Route path="/work/:slug" element={<CaseStudyPage />} />
-          <Route path="/process" element={<ProcessPage />} />
-          <Route path="/technologies" element={<TechnologiesPage />} />
-          <Route path="/insights" element={<InsightsPage />} />
-          <Route path="/insights/:slug" element={<InsightDetailPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/privacy" element={<LegalPage type="privacy" />} />
-          <Route path="/terms" element={<LegalPage type="terms" />} />
-          <Route path="/404" element={<NotFoundPage />} />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <Routes location={location}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/services/:slug" element={<ServiceDetailPage />} />
+              <Route path="/solutions" element={<SolutionsPage />} />
+              <Route path="/industries" element={<IndustriesPage />} />
+              <Route path="/work" element={<WorkPage />} />
+              <Route path="/work/:slug" element={<CaseStudyPage />} />
+              <Route path="/process" element={<ProcessPage />} />
+              <Route path="/technologies" element={<TechnologiesPage />} />
+              <Route path="/insights" element={<InsightsPage />} />
+              <Route path="/insights/:slug" element={<InsightDetailPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/privacy" element={<LegalPage type="privacy" />} />
+              <Route path="/terms" element={<LegalPage type="terms" />} />
+              <Route path="/404" element={<NotFoundPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
       </main>
       <Footer />
     </>
@@ -126,9 +140,9 @@ function Navbar() {
 
   return (
     <header className={`sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl transition-all duration-300 ${isCompact ? 'shadow-[0_10px_30px_rgba(2,6,23,0.28)]' : ''}`}>
-      <div className={`mx-auto flex max-w-7xl items-center justify-between px-4 transition-all duration-300 sm:px-6 lg:px-8 ${isCompact ? 'py-2' : 'py-3'}`}>
-        <Link to="/" aria-label="Synergy Brix home" className="flex items-center gap-3">
-          <BrandLogo />
+      <div className={`mx-auto flex max-w-7xl items-center justify-between px-4 transition-all duration-500 sm:px-6 lg:px-8 ${isCompact ? 'py-2.5' : 'py-4'}`}>
+        <Link to="/" aria-label="Synergy Brix home" className="group flex items-center gap-3">
+          <BrandLogo className="transition-transform duration-500 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(16,185,129,0.45)]" />
           <div className="leading-tight">
             <div className="text-lg font-semibold tracking-tight text-white">Synergy Brix</div>
           </div>
@@ -169,39 +183,48 @@ function Navbar() {
         </button>
       </div>
 
-      {isOpen && (
-        <div className="border-t border-slate-700 bg-slate-950 lg:hidden">
-          <div className="mx-auto max-w-7xl space-y-2 px-4 py-4 sm:px-6">
-            {landingNavigation.map((item) => item.id === 'services' ? (
-              <div key={item.id} className="rounded-xl border border-slate-800 bg-slate-900/40 p-1">
-                <div className="flex items-center justify-between"><button type="button" onClick={() => goToSection(item.id)} className="px-2 py-2.5 text-left text-sm font-medium text-emerald-200">Services</button><button type="button" aria-label="Toggle services menu" aria-expanded={isServicesOpen} onClick={() => setIsServicesOpen((open) => !open)} className="p-2 text-slate-300"><ChevronDown size={17} className={isServicesOpen ? 'rotate-180' : ''} /></button></div>
-                {isServicesOpen && <div className="border-t border-slate-800 px-1 py-2">{services.map((service) => <Link key={service.slug} to={`/services/${service.slug}`} onClick={() => { setIsOpen(false); setIsServicesOpen(false) }} className="block rounded-lg px-2 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white">{service.title}</Link>)}</div>}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-xl lg:hidden"
+          >
+            <div className="mx-auto max-w-7xl space-y-2 px-4 py-4 sm:px-6">
+              {landingNavigation.map((item) => item.id === 'services' ? (
+                <div key={item.id} className="rounded-xl border border-slate-800 bg-slate-900/40 p-1">
+                  <div className="flex items-center justify-between"><button type="button" onClick={() => goToSection(item.id)} className="px-2 py-2.5 text-left text-sm font-medium text-emerald-200">Services</button><button type="button" aria-label="Toggle services menu" aria-expanded={isServicesOpen} onClick={() => setIsServicesOpen((open) => !open)} className="p-2 text-slate-300"><ChevronDown size={17} className={isServicesOpen ? 'rotate-180' : ''} /></button></div>
+                  {isServicesOpen && <div className="border-t border-slate-800 px-1 py-2">{services.map((service) => <Link key={service.slug} to={`/services/${service.slug}`} onClick={() => { setIsOpen(false); setIsServicesOpen(false) }} className="block rounded-lg px-2 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">{service.title}</Link>)}</div>}
+                </div>
+              ) : (
+                <button key={item.id} type="button" onClick={() => goToSection(item.id)} className={`block w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${location.pathname === '/' && activeSection === item.id ? 'bg-emerald-500/10 text-emerald-200' : 'text-slate-300 hover:bg-slate-900 hover:text-white'}`}>
+                  {item.label}
+                </button>
+              ))}
+              <div className="pt-2">
+                <LinkButton to={GOOGLE_FORM_URL} variant="primary" fullWidth onClick={() => setIsOpen(false)}>
+                  Start a Project
+                </LinkButton>
               </div>
-            ) : (
-              <button key={item.id} type="button" onClick={() => goToSection(item.id)} className={`block w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium ${location.pathname === '/' && activeSection === item.id ? 'bg-emerald-500/10 text-emerald-200' : 'text-slate-300 hover:bg-slate-900 hover:text-white'}`}>
-                {item.label}
-              </button>
-            ))}
-            <div className="pt-2">
-              <LinkButton to={GOOGLE_FORM_URL} variant="primary" fullWidth onClick={() => setIsOpen(false)}>
-                Start a Project
-              </LinkButton>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-950 text-slate-200">
+    <footer className="relative overflow-hidden border-t border-slate-800 bg-slate-950 text-slate-200">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.10),transparent_30%)]" />
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr_1.3fr]">
           <div>
-            <Link to="/" className="mb-5 inline-flex items-center gap-3">
-              <BrandLogo dark />
+            <Link to="/" className="group mb-5 inline-flex items-center gap-3">
+              <BrandLogo dark className="transition-transform duration-500 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(16,185,129,0.4)]" />
               <div className="text-lg font-semibold text-white">Synergy Brix</div>
             </Link>
             <p className="max-w-md text-sm leading-7 text-slate-300">
@@ -213,7 +236,10 @@ function Footer() {
             <ul className="flex flex-row flex-wrap items-center gap-4 text-sm text-slate-300">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to} className="transition hover:text-white">{link.label}</Link>
+                  <Link to={link.to} className="group relative transition hover:text-white">
+                    {link.label}
+                    <span className="absolute -bottom-1 left-0 h-px w-0 bg-emerald-300 transition-all duration-300 group-hover:w-full" />
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -232,13 +258,13 @@ function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition hover:border-emerald-400 hover:text-emerald-200"
+                  className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
                   aria-label={social.label}
                 >
                   {social.label.toLowerCase().includes("linkedin") ? (
-                    <FaLinkedinIn size={18} />
+                    <FaLinkedinIn size={18} className="transition-transform duration-300 group-hover:scale-110" />
                   ) : (
-                    <FaGithub size={18} />
+                    <FaGithub size={18} className="transition-transform duration-300 group-hover:scale-110" />
                   )}
                 </a>
               ))}
@@ -260,12 +286,17 @@ function HomePage() {
     <>
       <section id="home" className="relative overflow-hidden bg-slate-950">
         <div className="mesh-bg absolute inset-0" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_25%)]" />
-        <Container className="relative grid items-center gap-12 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_25%)]" />
+        <HeroOrbs />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.18]" style={{ backgroundImage: 'radial-gradient(rgba(167,243,208,0.5) 1px, transparent 1px)', backgroundSize: '38px 38px', maskImage: 'radial-gradient(circle at center, black 10%, transparent 75%)' }} />
+        <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
           <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.11 } } }}>
-            <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.5 }} className="section-tag mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
-              <Sparkles size={14} className="text-emerald-300" />
-              Technology built for real business needs
+            <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.5 }} className="mb-5 flex items-center gap-3">
+              <HeroBrandMark />
+              <span className="section-tag inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
+                <Sparkles size={14} className="text-emerald-300" />
+                Technology built for real business needs
+              </span>
             </motion.div>
             <motion.h1 variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.65 }} className="max-w-2xl text-4xl font-semibold leading-[1.04] tracking-[-0.065em] text-white sm:text-5xl lg:text-6xl">
               Building digital solutions that move your business forward.
@@ -290,6 +321,7 @@ function HomePage() {
             <ArchitectureVisual />
           </motion.div>
         </Container>
+        <ScrollIndicator />
       </section>
 
       <section className="why-section relative overflow-hidden py-20 lg:py-24">
@@ -533,7 +565,7 @@ function ServicesPage() {
     <PageShell title="Services" subtitle="Technology capabilities designed to solve real business challenges and support long-term growth." description="We help organizations modernize operations, build custom software, connect systems, and create practical digital tools that scale with the business.">
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {services.map((service) => (
-          <ServiceCard key={service.slug} service={service} detail />
+          <ServiceCard key={service.slug} service={service} />
         ))}
       </div>
       {showLegacyServicesRedesign && <>
@@ -555,12 +587,12 @@ function ServicesPage() {
         <Container>
           <SectionHeading eyebrow="Service capabilities" title="Purpose-built systems, not generic software." description="Each engagement begins with the business need, then brings together the technology, workflow, and data layers needed to solve it." />
           <div className="mt-10 grid gap-5 lg:grid-cols-12">
-            <ServiceCard service={services[0]} detail />
+            <ServiceCard service={services[0]} />
             <div className="grid gap-5 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
-              <ServiceCard service={services[1]} detail />
-              <ServiceCard service={services[2]} detail />
+              <ServiceCard service={services[1]} />
+              <ServiceCard service={services[2]} />
             </div>
-            {services.slice(3).map((service) => <ServiceCard key={service.slug} service={service} detail />)}
+            {services.slice(3).map((service) => <ServiceCard key={service.slug} service={service} />)}
           </div>
         </Container>
       </section>
@@ -904,7 +936,7 @@ function ContactInfoCard({ icon, label, value, href }: { icon: React.ReactNode; 
         href={href}
         target={href.startsWith('http') ? '_blank' : undefined}
         rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300/30 hover:bg-white/[0.07]"
+        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300/30 hover:bg-white/[0.07] hover:shadow-[0_0_24px_rgba(16,185,129,0.18)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
       >
         {content}
       </a>
@@ -912,7 +944,7 @@ function ContactInfoCard({ icon, label, value, href }: { icon: React.ReactNode; 
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition duration-300">
       {content}
     </div>
   )
@@ -1189,11 +1221,12 @@ function CTASection({ title, description, primaryLabel, secondaryLabel, primaryH
   )
 }
 
-function ServiceCard({ service, detail = false }: { service: (typeof services)[number]; detail?: boolean }) {
+function ServiceCard({ service }: { service: (typeof services)[number] }) {
   return (
-    <motion.article initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.35 }} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg">
+    <motion.article initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.35 }} className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-400/0 blur-2xl transition-colors duration-500 group-hover:bg-emerald-400/10" />
       <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-900 transition duration-300 group-hover:scale-105 group-hover:bg-emerald-100"><Code2 size={18} /></div>
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-900 transition duration-300 group-hover:scale-110 group-hover:bg-emerald-100 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"><Code2 size={18} /></div>
         <span className="rounded-full border border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Service</span>
       </div>
       <h3 className="mt-6 text-xl font-semibold text-slate-900">{service.title}</h3>
@@ -1203,8 +1236,8 @@ function ServiceCard({ service, detail = false }: { service: (typeof services)[n
           <span key={tech} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700">{tech}</span>
         ))}
       </div>
-      <Link to={detail ? `/services/${service.slug}` : `/services/${service.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Learn more <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+      <Link to={`/services/${service.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
+        Learn more <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
       </Link>
     </motion.article>
   )
@@ -1212,8 +1245,8 @@ function ServiceCard({ service, detail = false }: { service: (typeof services)[n
 
 function IndustryCard({ industry }: { industry: { title: string; summary: string } }) {
   return (
-    <div className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-md">
-      <div className="mb-4 inline-flex rounded-xl bg-emerald-50 p-3 text-emerald-900 transition duration-300 group-hover:scale-105"><Building2 size={18} /></div>
+    <div className="group glass-card-hover relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-4 inline-flex rounded-xl bg-emerald-50 p-3 text-emerald-900 transition duration-300 group-hover:scale-110 group-hover:bg-emerald-100 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]"><Building2 size={18} /></div>
       <h3 className="text-xl font-semibold text-slate-900">{industry.title}</h3>
       <p className="mt-3 text-sm leading-7 text-slate-600">{industry.summary}</p>
     </div>
@@ -1222,9 +1255,9 @@ function IndustryCard({ industry }: { industry: { title: string; summary: string
 
 function CaseStudyCard({ item }: { item: (typeof caseStudies)[number] }) {
   return (
-    <article className="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-200 hover:shadow-lg">
-      <div className="mb-6 h-28 rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ecfdf5_55%,#d1fae5_100%)] p-4">
-        <div className="h-2 w-20 rounded-full bg-emerald-900/15" /><div className="mt-4 grid grid-cols-3 gap-2"><div className="h-12 rounded-md bg-white shadow-sm" /><div className="h-12 rounded-md bg-emerald-600/15" /><div className="h-12 rounded-md bg-white shadow-sm" /></div>
+    <article className="group glass-card-hover relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="mb-6 h-28 overflow-hidden rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ecfdf5_55%,#d1fae5_100%)] p-4">
+        <div className="h-2 w-20 rounded-full bg-emerald-900/15 transition-transform duration-500 group-hover:scale-x-125 group-hover:origin-left" /><div className="mt-4 grid grid-cols-3 gap-2"><div className="h-12 rounded-md bg-white shadow-sm transition-transform duration-500 group-hover:-translate-y-1" /><div className="h-12 rounded-md bg-emerald-600/15 transition-transform duration-500 group-hover:-translate-y-1" /><div className="h-12 rounded-md bg-white shadow-sm transition-transform duration-500 group-hover:-translate-y-1" /></div>
       </div>
       <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{item.label}</div>
       <h3 className="mt-3 text-2xl font-semibold text-slate-900">{item.title}</h3>
@@ -1234,8 +1267,8 @@ function CaseStudyCard({ item }: { item: (typeof caseStudies)[number] }) {
           <span key={tech} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700">{tech}</span>
         ))}
       </div>
-      <Link to={`/work/${item.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        View case study <ArrowRight size={16} className="transition-transform duration-200 group-hover:translate-x-1" />
+      <Link to={`/work/${item.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
+        View case study <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
       </Link>
     </article>
   )
@@ -1243,13 +1276,13 @@ function CaseStudyCard({ item }: { item: (typeof caseStudies)[number] }) {
 
 function BlogCard({ post }: { post: (typeof blogPosts)[number] }) {
   return (
-    <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <article className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{post.category}</div>
-      <h3 className="mt-3 text-xl font-semibold text-slate-900">{post.title}</h3>
+      <h3 className="mt-3 text-xl font-semibold text-slate-900 transition-colors group-hover:text-emerald-700">{post.title}</h3>
       <div className="mt-2 text-xs uppercase tracking-[0.14em] text-slate-500">{post.date} • {post.readTime}</div>
       <p className="mt-4 text-sm leading-7 text-slate-600">{post.excerpt}</p>
-      <Link to={`/insights/${post.slug}`} className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Read article <ArrowRight size={16} />
+      <Link to={`/insights/${post.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
+        Read article <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
       </Link>
     </article>
   )
@@ -1274,27 +1307,35 @@ function isExternalHref(href: string) {
 }
 
 function LinkButton({ to, children, variant = 'primary', className = '', icon, fullWidth = false, onClick }: { to: string; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'primary-light' | 'secondary-light'; className?: string; icon?: React.ReactNode; fullWidth?: boolean; onClick?: () => void }) {
-  const base = 'inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 hover:-translate-y-0.5 hover:shadow-lg'
+  const base = 'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-sm font-medium transition duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-md'
   const styles = {
-    primary: 'bg-emerald-700 text-white shadow-[0_12px_30px_rgba(5,150,105,0.25)] hover:bg-emerald-600',
-    secondary: 'border border-slate-200 bg-white text-slate-900 hover:border-emerald-200 hover:text-emerald-900',
+    primary: 'bg-emerald-700 text-white shadow-[0_12px_30px_rgba(5,150,105,0.25)] hover:bg-emerald-600 hover:shadow-[0_16px_40px_rgba(5,150,105,0.4)]',
+    secondary: 'border border-slate-200 bg-white text-slate-900 hover:border-emerald-300 hover:text-emerald-900',
     'primary-light': 'bg-white text-emerald-900 hover:bg-emerald-50',
     'secondary-light': 'border border-white/25 bg-white/5 text-white hover:border-emerald-300/50 hover:bg-white/10',
   }
 
+  const inner = (
+    <>
+      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+      <span className="relative inline-flex items-center gap-2">
+        {children}
+        {icon && <span className="inline-flex transition-transform duration-300 group-hover:translate-x-1">{icon}</span>}
+      </span>
+    </>
+  )
+
   if (isExternalHref(to)) {
     return (
       <a href={to} target="_blank" rel="noopener noreferrer" onClick={onClick} className={`${base} ${styles[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}>
-        {children}
-        {icon}
+        {inner}
       </a>
     )
   }
 
   return (
     <Link to={to} onClick={onClick} className={`${base} ${styles[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}>
-      {children}
-      {icon}
+      {inner}
     </Link>
   )
 }
@@ -1336,3 +1377,144 @@ function SectionHeading({ eyebrow, title, description }: { eyebrow: string; titl
 }
 
 export default App
+
+/* ----------------------------------------------------------------------------
+ * Global UI: Preloader, Mouse glow, scroll indicator, brand marks
+ * -------------------------------------------------------------------------- */
+
+function Preloader() {
+  const [hidden, setHidden] = useState(() => sessionStorage.getItem('sb_preloaded') === '1')
+
+  useEffect(() => {
+    if (hidden) return
+    const timer = window.setTimeout(() => {
+      setHidden(true)
+      sessionStorage.setItem('sb_preloaded', '1')
+    }, 1100)
+    return () => window.clearTimeout(timer)
+  }, [hidden])
+
+  return (
+    <AnimatePresence>
+      {!hidden && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          aria-hidden="true"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.18),transparent_60%)]" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.6 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="relative flex flex-col items-center"
+          >
+            <div className="relative">
+              <motion.div
+                animate={{ scale: [1, 1.06, 1], boxShadow: ['0 0 0px rgba(16,185,129,0)', '0 0 40px rgba(16,185,129,0.6)', '0 0 0px rgba(16,185,129,0)'] }}
+                transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
+                className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2"
+              >
+                <img src="/logo.png" alt="" className="h-full w-full object-contain" />
+              </motion.div>
+              <motion.span
+                className="absolute -inset-2 rounded-3xl border border-emerald-400/40"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: [0.2, 0.6, 0], scale: [0.8, 1.25, 1.5] }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeOut' }}
+              />
+            </div>
+            <span className="mt-5 text-sm font-medium tracking-[0.3em] text-emerald-200/80">SYNERGY BRIX</span>
+            <div className="mt-4 h-0.5 w-32 overflow-hidden rounded-full bg-white/10">
+              <motion.div
+                className="h-full w-1/2 bg-emerald-400"
+                animate={{ x: ['-100%', '200%'] }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+function ScrollProgress() {
+  const { scrollYProgress } = useScroll()
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 })
+  return (
+    <motion.div
+      aria-hidden="true"
+      style={{ scaleX }}
+      className="fixed left-0 right-0 top-0 z-[60] h-0.5 origin-left bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-500"
+    />
+  )
+}
+
+function HeroOrbs() {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, 120])
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -90])
+  const y3 = useTransform(scrollYProgress, [0, 1], [0, 60])
+
+  return (
+    <div ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+      <motion.div style={{ y: y1 }} className="animate-blob-1 absolute -left-24 top-24 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
+      <motion.div style={{ y: y2 }} className="animate-blob-2 absolute right-0 top-40 h-80 w-80 rounded-full bg-teal-400/15 blur-3xl" />
+      <motion.div style={{ y: y3 }} className="animate-blob-1 absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+    </div>
+  )
+}
+
+function HeroBrandMark() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.7 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      className="relative h-9 w-9 shrink-0"
+    >
+      <motion.div
+        animate={{ y: [0, -4, 0] }}
+        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+        className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1 shadow-[0_0_24px_rgba(16,185,129,0.35)] ring-1 ring-white/20"
+      >
+        <img src="/logo.png" alt="" className="h-full w-full object-contain" />
+      </motion.div>
+      <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.9)]" />
+    </motion.div>
+  )
+}
+
+function ScrollIndicator() {
+  return (
+    <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2" aria-hidden="true">
+      <motion.a
+        href="#services"
+        onClick={(e) => {
+          e.preventDefault()
+          document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
+        }}
+        className="flex flex-col items-center gap-2 text-slate-400 transition-colors hover:text-emerald-300"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 0.6 }}
+        aria-label="Scroll to content"
+      >
+        <span className="text-[10px] font-medium uppercase tracking-[0.25em]">Scroll</span>
+        <span className="flex h-9 w-5 justify-center rounded-full border border-slate-600 p-1">
+          <motion.span
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+          />
+        </span>
+      </motion.a>
+    </div>
+  )
+}
+
+
