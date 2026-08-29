@@ -79,13 +79,11 @@ export function PointerParallax({ children, strength = 16, className = '' }: { c
 
 /* Custom cursor — desktop only */
 export function Cursor() {
-  const [enabled, setEnabled] = useState(false)
-  const [variant, setVariant] = useState<'default' | 'hover' | 'view'>('default')
-  const [label, setLabel] = useState<string | null>(null)
+  const [, setEnabled] = useState(false)
+  const [, setVariant] = useState<'default' | 'hover' | 'view'>('default')
+  const [, setLabel] = useState<string | null>(null)
   const dotX = useMotionValue(-100)
   const dotY = useMotionValue(-100)
-  const ringX = useSpring(dotX, { stiffness: 250, damping: 30, mass: 0.6 })
-  const ringY = useSpring(dotY, { stiffness: 180, damping: 24, mass: 0.6 })
 
   useEffect(() => {
     if (!window.matchMedia('(pointer: fine)').matches) return
