@@ -79,43 +79,6 @@ export function PointerParallax({ children, strength = 16, className = '' }: { c
 
 /* Custom cursor — desktop only */
 export function Cursor() {
-  const [enabled, setEnabled] = useState(false)
-  const [variant, setVariant] = useState<'default' | 'hover' | 'view'>('default')
-  const [label, setLabel] = useState<string | null>(null)
-  const dotX = useMotionValue(-100)
-  const dotY = useMotionValue(-100)
-  const ringX = useSpring(dotX, { stiffness: 250, damping: 30, mass: 0.6 })
-  const ringY = useSpring(dotY, { stiffness: 180, damping: 24, mass: 0.6 })
-
-  useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return
-    setEnabled(true)
-    const onMove = (e: MouseEvent) => {
-      dotX.set(e.clientX)
-      dotY.set(e.clientY)
-      const target = e.target as HTMLElement
-      const cursorAttr = target.closest('[data-cursor]') as HTMLElement | null
-      if (cursorAttr) {
-        const v = cursorAttr.dataset.cursor
-        if (v === 'view') {
-          setVariant('view')
-          setLabel(cursorAttr.dataset.cursorLabel || 'View')
-        } else if (v === 'hover') {
-          setVariant('hover')
-          setLabel(null)
-        } else {
-          setVariant('default')
-          setLabel(null)
-        }
-      } else {
-        setVariant('default')
-        setLabel(null)
-      }
-    }
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => window.removeEventListener('mousemove', onMove)
-  }, [dotX, dotY])
-
   return null
 }
 
