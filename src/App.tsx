@@ -38,6 +38,7 @@ import {
   services,
   solutions,
 } from './data/siteData'
+import { SITE_URL } from './config/siteUrl'
 import { usePageMeta } from './hooks/usePageMeta'
 import {
   PointerParallax,
@@ -1366,7 +1367,7 @@ function ServiceDetailPage() {
   usePageMeta({
     title: service ? `${service.title} | Synergy Brix` : 'Page Not Found | Synergy Brix',
     description: service ? service.short : 'The page you requested could not be found.',
-    canonical: service ? `https://synergybrix.com/services/${service.slug}` : 'https://synergybrix.com/404',
+    canonical: service ? `${SITE_URL}/services/${service.slug}` : `${SITE_URL}/404`,
   })
 
   if (!service) return <NotFoundPage />
@@ -1563,7 +1564,7 @@ function CaseStudyPage() {
   usePageMeta({
     title: item ? `${item.title} | Synergy Brix` : 'Not Found | Synergy Brix',
     description: item ? item.overview : 'The page you requested does not exist or may have moved.',
-    canonical: item ? `https://synergybrix.com/work/${item.slug}` : 'https://synergybrix.com/404',
+    canonical: item ? `${SITE_URL}/work/${item.slug}` : `${SITE_URL}/404`,
   })
   if (!item) return <NotFoundPage />
 
@@ -1721,7 +1722,7 @@ function InsightDetailPage() {
   usePageMeta({
     title: post ? `${post.title} | Synergy Brix` : 'Page Not Found | Synergy Brix',
     description: post ? post.excerpt : 'The insight you are looking for could not be found.',
-    canonical: post ? `https://synergybrix.com/insights/${post.slug}` : 'https://synergybrix.com/404',
+    canonical: post ? `${SITE_URL}/insights/${post.slug}` : `${SITE_URL}/404`,
   })
   if (!post) return <NotFoundPage />
   return (
@@ -1965,7 +1966,7 @@ function LegalPage({ type }: { type: 'privacy' | 'terms' }) {
   usePageMeta({
     title: `${content.title} | Synergy Brix`,
     description: content.description,
-    canonical: `https://synergybrix.com/${type === 'privacy' ? 'privacy' : 'terms'}`,
+    canonical: `${SITE_URL}/${type === 'privacy' ? 'privacy' : 'terms'}`,
   })
 
   return (
@@ -1990,7 +1991,8 @@ function NotFoundPage() {
   usePageMeta({
     title: 'Page Not Found | Synergy Brix',
     description: 'The page you requested does not exist or may have moved.',
-    canonical: 'https://synergybrix.com/404',
+    canonical: `${SITE_URL}/404`,
+    robots: 'noindex, nofollow',
   })
   return (
     <div className="bg-ink-950">
