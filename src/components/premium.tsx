@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import {
   motion,
@@ -6,6 +6,8 @@ import {
   useMotionValueEvent,
   AnimatePresence,
   useReducedMotion,
+  useMotionValue,
+  useSpring,
 } from 'framer-motion'
 import {
   Compass,
@@ -19,24 +21,28 @@ import {
   TrendingUp,
   Handshake,
   Send,
+  ArrowUpRight,
 } from 'lucide-react'
 
-function Container({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
+/* ============================================================================
+ * Shared primitives
+ * ========================================================================= */
+
+function Container({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 }
 
-function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
+export function SectionIndex({ index, label }: { index: string; label: string }) {
   return (
-    <div className="max-w-3xl">
-      <div className="section-tag inline-flex rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">{eyebrow}</div>
-      <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">{title}</h2>
-      <p className="mt-4 text-base leading-8 text-slate-600 md:text-lg">{description}</p>
+    <div className="section-index">
+      <span className="index-num">{index}</span>
+      <span>{label}</span>
     </div>
   )
 }
 
-/* Subtle, desktop-only cursor parallax that mutates transform directly (no re-renders). */
-export function PointerParallax({ children, strength = 12, className = '' }: { children: React.ReactNode; strength?: number; className?: string }) {
+/* Subtle, desktop-only cursor parallax that mutates transform directly. */
+export function PointerParallax({ children, strength = 16, className = '' }: { children: ReactNode; strength?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
   useEffect(() => {
@@ -71,212 +77,160 @@ export function PointerParallax({ children, strength = 12, className = '' }: { c
   )
 }
 
-/* -------------------------------------------------------------------------- */
-/* How We Work                                                                */
-/* -------------------------------------------------------------------------- */
+/* Custom cursor — desktop only */
+export function Cursor() {
+  const [enabled, setEnabled] = useState(false)
+  const [variant, setVariant] = useState<'default' | 'hover' | 'view'>('default')
+  const [label, setLabel] = useState<string | null>(null)
+  const dotX = useMotionValue(-100)
+  const dotY = useMotionValue(-100)
+  const ringX = useSpring(dotX, { stiffness: 250, damping: 30, mass: 0.6 })
+  const ringY = useSpring(dotY, { stiffness: 180, damping: 24, mass: 0.6 })
 
-const howWeWork = [
-  { num: '01', title: 'Discover', text: 'Understand the idea, business goals, target users, and requirements.', Icon: Compass },
-  { num: '02', title: 'Strategy', text: 'Define the right technology, architecture, roadmap, and development approach.', Icon: Map },
-  { num: '03', title: 'Design', text: 'Create intuitive user experiences and modern interfaces.', Icon: PenTool },
-  { num: '04', title: 'Develop', text: 'Build scalable, secure, and high-performance solutions.', Icon: Code2 },
-  { num: '05', title: 'Launch & Grow', text: 'Deploy, optimize, maintain, and improve the product.', Icon: Rocket },
-]
+  useEffect(() => {
+    if (!window.matchMedia('(pointer: fine)').matches) return
+    setEnabled(true)
+    const onMove = (e: MouseEvent) => {
+      dotX.set(e.clientX)
+      dotY.set(e.clientY)
+      const target = e.target as HTMLElement
+      const cursorAttr = target.closest('[data-cursor]') as HTMLElement | null
+      if (cursorAttr) {
+        const v = cursorAttr.dataset.cursor
+        if (v === 'view') {
+          setVariant('view')
+          setLabel(cursorAttr.dataset.cursorLabel || 'View')
+        } else if (v === 'hover') {
+          setVariant('hover')
+          setLabel(null)
+        } else {
+          setVariant('default')
+          setLabel(null)
+        }
+      } else {
+        setVariant('default')
+        setLabel(null)
+      }
+    }
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [dotX, dotY])
 
-export function HowWeWork() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start 75%', 'end 65%'] })
-  const [active, setActive] = useState(0)
+  return null
+}
+
+/* Word-by-word mask reveal */
+export function RevealText({
+  children,
+  className = '',
+  delay = 0,
+  as: As = 'span',
+}: {
+  children: string
+  className?: string
+  delay?: number
+  as?: 'span' | 'h1' | 'h2' | 'h3' | 'p' | 'div'
+}) {
+  const words = children.split(' ')
+  return (
+    <As className={className}>
+      {words.map((word, i) => (
+        <span key={`${word}-${i}`} className="inline-block overflow-hidden align-bottom">
+          <motion.span
+            className="inline-block will-change-transform"
+            initial={{ y: '110%' }}
+            animate={{ y: '0%' }}
+            transition={{
+              duration: 0.9,
+              delay: delay + i * 0.045,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            {word}
+            {i < words.length - 1 ? '\u00A0' : ''}
+          </motion.span>
+        </span>
+      ))}
+    </As>
+  )
+}
+
+/* Magnetic wrapper for buttons (desktop only) */
+export function Magnetic({ children, strength = 0.35 }: { children: ReactNode; strength?: number }) {
+  const ref = useRef<HTMLDivElement>(null)
   const reduce = useReducedMotion()
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+  const sx = useSpring(x, { stiffness: 220, damping: 18, mass: 0.4 })
+  const sy = useSpring(y, { stiffness: 220, damping: 18, mass: 0.4 })
 
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    const idx = Math.min(howWeWork.length - 1, Math.max(0, Math.floor(v * howWeWork.length)))
-    setActive(idx)
-  })
-
-  const fill = ((active + 1) / howWeWork.length) * 100
+  useEffect(() => {
+    const el = ref.current
+    if (!el || reduce) return
+    if (!window.matchMedia('(pointer: fine)').matches) return
+    const onMove = (e: MouseEvent) => {
+      const rect = el.getBoundingClientRect()
+      const cx = rect.left + rect.width / 2
+      const cy = rect.top + rect.height / 2
+      const dx = (e.clientX - cx) * strength
+      const dy = (e.clientY - cy) * strength
+      x.set(dx)
+      y.set(dy)
+    }
+    const onLeave = () => {
+      x.set(0)
+      y.set(0)
+    }
+    el.addEventListener('mousemove', onMove)
+    el.addEventListener('mouseleave', onLeave)
+    return () => {
+      el.removeEventListener('mousemove', onMove)
+      el.removeEventListener('mouseleave', onLeave)
+    }
+  }, [strength, x, y, reduce])
 
   return (
-    <section ref={sectionRef} className="relative overflow-hidden bg-slate-50 py-20 lg:py-24">
-      <div className="pointer-events-none absolute -right-24 top-10 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
-      <Container>
-        <SectionHeading eyebrow="How we work" title="A disciplined path from idea to impact" description="Every engagement follows a clear, business-aligned process — keeping technical quality, communication, and outcomes in sync from start to finish." />
-
-        <div className="mt-14">
-          {/* Desktop: horizontal timeline */}
-          <div className="hidden lg:block">
-            <div className="relative mx-auto max-w-5xl">
-              <div className="absolute left-0 right-0 top-[34px] h-0.5 rounded-full bg-slate-200" />
-              <motion.div
-                className="absolute left-0 top-[34px] h-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400"
-                animate={{ width: `${fill}%` }}
-                transition={reduce ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
-              />
-              <div className="relative grid grid-cols-5 gap-4">
-                {howWeWork.map((step, i) => {
-                  const isActive = i <= active
-                  const isCurrent = i === active
-                  return (
-                    <div key={step.num} className="flex flex-col items-center text-center">
-                      <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, amount: 0.4 }}
-                        transition={{ duration: 0.4, delay: i * 0.06 }}
-                        className={`relative z-10 flex h-[68px] w-[68px] items-center justify-center rounded-2xl border-2 transition-colors duration-500 ${
-                          isActive ? 'border-emerald-500 bg-emerald-500 text-white shadow-[0_12px_30px_rgba(16,185,129,0.3)]' : 'border-slate-200 bg-white text-slate-400'
-                        }`}
-                      >
-                        <step.Icon size={26} className={isCurrent && !reduce ? 'animate-[pulse_2s_ease-in-out_infinite]' : ''} />
-                        {isCurrent && (
-                          <span className="absolute -bottom-2 h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
-                        )}
-                      </motion.div>
-                      <div className="mt-5 text-sm font-semibold text-emerald-700">{step.num}</div>
-                      <h3 className="mt-1 text-lg font-semibold text-slate-900">{step.title}</h3>
-                      <p className="mt-2 px-2 text-sm leading-6 text-slate-600">{step.text}</p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile/tablet: vertical timeline */}
-          <div className="lg:hidden">
-            <div className="relative pl-10">
-              <div className="absolute left-[19px] top-2 bottom-2 w-0.5 rounded-full bg-slate-200" />
-              <motion.div
-                className="absolute left-[19px] top-2 w-0.5 rounded-full bg-gradient-to-b from-emerald-500 to-teal-400"
-                animate={{ height: `${fill}%` }}
-                transition={reduce ? { duration: 0 } : { duration: 0.5, ease: 'easeOut' }}
-              />
-              <div className="space-y-6">
-                {howWeWork.map((step, i) => {
-                  const isActive = i <= active
-                  return (
-                    <motion.div
-                      key={step.num}
-                      initial={{ opacity: 0, x: 16 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true, amount: 0.4 }}
-                      transition={{ duration: 0.4 }}
-                      className="relative"
-                    >
-                      <div className={`absolute -left-10 top-0 flex h-10 w-10 items-center justify-center rounded-xl border-2 transition-colors duration-500 ${
-                        isActive ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 bg-white text-slate-400'
-                      }`}>
-                        <step.Icon size={18} />
-                      </div>
-                      <div className={`rounded-2xl border p-4 transition-colors duration-500 ${
-                        isActive ? 'border-emerald-200 bg-white shadow-sm' : 'border-slate-200 bg-white'
-                      }`}>
-                        <div className="text-xs font-semibold text-emerald-700">{step.num} · {step.title}</div>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">{step.text}</p>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      </Container>
-    </section>
+    <motion.div ref={ref} style={{ x: sx, y: sy, display: 'inline-block' }}>
+      {children}
+    </motion.div>
   )
 }
 
-/* -------------------------------------------------------------------------- */
-/* Why Choose Synergy Brix                                                    */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+ * Floating technology chips for the hero
+ * ========================================================================= */
 
-const whyChoose = [
-  { title: 'Fast & Efficient Execution', text: 'We focus on delivering high-quality solutions efficiently without unnecessary complexity.', Icon: Zap },
-  { title: 'Business-Focused Development', text: 'Every solution is built to solve a real business or user problem.', Icon: Target },
-  { title: 'Scalable & Secure Architecture', text: 'Applications are built using clean, scalable, and secure development practices.', Icon: ShieldCheck },
-  { title: 'Built for Growth', text: 'We create solutions that evolve as your business requirements grow.', Icon: TrendingUp },
-  { title: 'Long-Term Collaboration', text: 'We build lasting relationships and support products well beyond launch.', Icon: Handshake },
-]
-
-export function WhyChoose() {
+export function HeroFloatingCards() {
+  const cards = [
+    { label: 'React', x: '1%', y: '8%', delay: '' },
+    { label: 'REST APIs', x: 'auto', y: '14%', right: '4%', delay: 'hero-float-delayed' },
+    { label: 'Cloud Deploy', x: '4%', y: 'auto', bottom: '12%', delay: 'hero-float-delayed' },
+    { label: 'Dashboards', x: 'auto', y: 'auto', right: '2%', bottom: '14%', delay: '' },
+  ]
   return (
-    <section className="relative overflow-hidden bg-white py-20 lg:py-24">
-      <Container>
-        <SectionHeading eyebrow="Why Synergy Brix" title="A partner built for long-term value" description="We combine disciplined engineering with genuine business understanding, so the technology we build keeps working as you grow." />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {whyChoose.map((item, i) => (
-            <motion.article
-              key={item.title}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.45, delay: (i % 3) * 0.08 }}
-              className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6"
-            >
-              <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-emerald-400/0 blur-2xl transition-colors duration-500 group-hover:bg-emerald-400/10" />
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white group-hover:shadow-[0_0_22px_rgba(16,185,129,0.3)]">
-                <item.Icon size={22} />
-              </div>
-              <h3 className="mt-5 text-lg font-semibold text-slate-900">{item.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-slate-600">{item.text}</p>
-            </motion.article>
-          ))}
+    <div className="pointer-events-none absolute inset-0 hidden sm:block" aria-hidden="true">
+      {cards.map((c) => (
+        <div
+          key={c.label}
+          className={`hero-tech-card hero-float ${c.delay} absolute`}
+          style={{
+            top: c.y !== 'auto' ? c.y : undefined,
+            bottom: c.bottom,
+            left: c.x,
+            right: c.right,
+          }}
+        >
+          <span className="dot" />
+          {c.label}
         </div>
-      </Container>
-    </section>
+      ))}
+    </div>
   )
 }
 
-/* -------------------------------------------------------------------------- */
-/* Technology Stack                                                           */
-/* -------------------------------------------------------------------------- */
-
-const techCategories = [
-  { title: 'Frontend', items: ['React', 'Next.js', 'TypeScript', 'JavaScript'] },
-  { title: 'Backend', items: ['Java', 'Spring Boot', 'Node.js'] },
-  { title: 'Database', items: ['PostgreSQL', 'MongoDB'] },
-  { title: 'Cloud & Deployment', items: ['Docker', 'Vercel', 'Cloud Technologies'] },
-]
-
-export function TechnologyStack() {
-  return (
-    <section className="relative overflow-hidden bg-slate-50 py-20 lg:py-24">
-      <div className="pointer-events-none absolute -left-24 bottom-0 h-72 w-72 rounded-full bg-teal-400/10 blur-3xl" />
-      <Container>
-        <SectionHeading eyebrow="Technology" title="A modern, pragmatic stack" description="We choose technologies based on project needs — prioritizing scalability, maintainability, and long-term business value." />
-        <div className="mt-12 grid gap-5 md:grid-cols-2">
-          {techCategories.map((cat, ci) => (
-            <motion.div
-              key={cat.title}
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{ duration: 0.45, delay: ci * 0.06 }}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-emerald-700">{cat.title}</h3>
-              <div className="mt-4 flex flex-wrap gap-2.5">
-                {cat.items.map((tech) => (
-                  <span
-                    key={tech}
-                    className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm font-medium text-slate-500 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-[0_0_18px_rgba(16,185,129,0.15)]"
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-300 transition-colors duration-300 group-hover:bg-emerald-500 group-hover:shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-/* -------------------------------------------------------------------------- */
-/* Floating contact button                                                    */
-/* -------------------------------------------------------------------------- */
+/* ============================================================================
+ * Floating contact button (refined)
+ * ========================================================================= */
 
 export function FloatingContactButton() {
   const [visible, setVisible] = useState(false)
@@ -301,16 +255,314 @@ export function FloatingContactButton() {
         >
           <Link
             to="/contact"
+            data-cursor="hover"
             aria-label="Start a project with Synergy Brix"
-            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(5,150,105,0.4)] transition hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-[0_18px_42px_rgba(5,150,105,0.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+            className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-emerald-950 shadow-[0_14px_34px_rgba(5,150,105,0.4)] transition hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-[0_18px_42px_rgba(5,150,105,0.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
           >
-            <span className={`absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full ${reduce ? '' : ''}`} />
-            <span className={`absolute -left-1 -top-1 h-3 w-3 rounded-full bg-emerald-300 ${reduce ? '' : 'animate-ping opacity-60'}`} />
+            <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+            {!reduce && <span className="absolute -left-1 -top-1 h-3 w-3 rounded-full bg-emerald-300 animate-ping opacity-60" />}
             <Send size={16} className="relative" />
             <span className="relative">Let&apos;s Talk</span>
           </Link>
         </motion.div>
       )}
     </AnimatePresence>
+  )
+}
+
+/* ============================================================================
+ * Marquee (tech chip bar)
+ * ========================================================================= */
+
+export function Marquee({ items, className = '' }: { items: string[]; className?: string }) {
+  const seq = [...items, ...items]
+  return (
+    <div className={`relative overflow-hidden ${className}`}>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-ink-950 to-transparent z-10" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-ink-950 to-transparent z-10" />
+      <div className="marquee gap-10">
+        {seq.map((item, i) => (
+          <div
+            key={`${item}-${i}`}
+            className="flex items-center gap-3 text-sm font-medium text-slate-400 whitespace-nowrap"
+          >
+            <span className="h-1 w-1 rounded-full bg-emerald-400/70" />
+            <span className="tracking-wide">{item}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/* ============================================================================
+ * How We Work — premium timeline
+ * ========================================================================= */
+
+const howWeWork = [
+  { num: '01', title: 'Discover', text: 'We understand the idea, business goals, target users, and the constraints that actually shape delivery.', Icon: Compass },
+  { num: '02', title: 'Strategy', text: 'We define the right technology, architecture, and roadmap so the system fits the business — not the other way around.', Icon: Map },
+  { num: '03', title: 'Design', text: 'We design intuitive user experiences and product surfaces that feel as good as they perform.', Icon: PenTool },
+  { num: '04', title: 'Develop', text: 'We build scalable, secure, and high-performance software with clean, maintainable engineering.', Icon: Code2 },
+  { num: '05', title: 'Launch & Grow', text: 'We deploy, monitor, optimize, and continuously improve the product as your business evolves.', Icon: Rocket },
+]
+
+export function HowWeWork() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start 75%', 'end 65%'] })
+  const [active, setActive] = useState(0)
+  const reduce = useReducedMotion()
+
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    const idx = Math.min(howWeWork.length - 1, Math.max(0, Math.floor(v * howWeWork.length)))
+    setActive(idx)
+  })
+
+  const fillPercent = ((active + 1) / howWeWork.length) * 100
+
+  return (
+    <section ref={sectionRef} className="relative overflow-hidden bg-ink-950 py-24 lg:py-32 noise-overlay">
+      <div className="mesh-bg absolute inset-0" />
+      <div className="pointer-events-none absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-emerald-500/10 blur-[100px]" />
+      <Container className="relative">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <SectionIndex index="02" label="How we work" />
+            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+              A disciplined path <span className="font-serif-display italic text-emerald-200/90">from idea</span> to impact.
+            </h2>
+          </div>
+          <p className="max-w-md text-base leading-7 text-slate-400 lg:text-right">
+            Every engagement follows a clear, business-aligned process — keeping technical quality, communication, and outcomes in sync from start to finish.
+          </p>
+        </div>
+
+        <div className="mt-20">
+          {/* Desktop timeline */}
+          <div className="hidden lg:block">
+            <div className="relative mx-auto max-w-5xl">
+              <div className="timeline-track" />
+              <motion.div
+                className="timeline-track-fill"
+                animate={{ width: `${fillPercent}%` }}
+                transition={reduce ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+              />
+              <div className="relative grid grid-cols-5 gap-4">
+                {howWeWork.map((step, i) => {
+                  const isActive = i <= active
+                  return (
+                    <motion.div
+                      key={step.num}
+                      initial={{ opacity: 0, y: 16 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.3 }}
+                      transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                      className="flex flex-col items-center text-center"
+                    >
+                      <div
+                        className="timeline-node"
+                        data-active={isActive}
+                      >
+                        <step.Icon size={24} />
+                      </div>
+                      <div className="mt-6 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">{step.num}</div>
+                      <h3 className="mt-2 text-lg font-semibold text-white">{step.title}</h3>
+                      <p className="mt-2 px-2 text-sm leading-6 text-slate-400">{step.text}</p>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile vertical timeline */}
+          <div className="lg:hidden">
+            <div className="relative pl-12">
+              <div className="absolute left-5 top-2 bottom-2 w-px bg-white/8" />
+              <motion.div
+                className="absolute left-5 top-2 w-px bg-gradient-to-b from-emerald-400 to-teal-400"
+                animate={{ height: `${fillPercent}%` }}
+                transition={reduce ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
+              />
+              <div className="space-y-8">
+                {howWeWork.map((step, i) => {
+                  const isActive = i <= active
+                  return (
+                    <motion.div
+                      key={step.num}
+                      initial={{ opacity: 0, x: 16 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, amount: 0.3 }}
+                      transition={{ duration: 0.5 }}
+                      className="relative"
+                    >
+                      <div
+                        className="timeline-node absolute -left-12 top-0"
+                        data-active={isActive}
+                        style={{ width: 44, height: 44 }}
+                      >
+                        <step.Icon size={18} />
+                      </div>
+                      <div className="glass-panel relative-sweep rounded-2xl border border-white/6 p-5">
+                        <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">{step.num} · {step.title}</div>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">{step.text}</p>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ============================================================================
+ * Why Choose — editorial split layout
+ * ========================================================================= */
+
+const whyChoose = [
+  { title: 'Fast & Efficient Execution', text: 'We focus on delivering high-quality solutions efficiently — without unnecessary complexity.', Icon: Zap },
+  { title: 'Business-Focused Development', text: 'Every solution is built to solve a real business or user problem — not to showcase technology.', Icon: Target },
+  { title: 'Scalable & Secure Architecture', text: 'Applications are built with clean, scalable, and secure development practices from the start.', Icon: ShieldCheck },
+  { title: 'Built for Growth', text: 'We create solutions that evolve as your business requirements grow and shift.', Icon: TrendingUp },
+  { title: 'Long-Term Collaboration', text: 'We build lasting relationships and support products well beyond launch.', Icon: Handshake },
+]
+
+export function WhyChoose() {
+  return (
+    <section className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+      <div className="dotted-grid pointer-events-none absolute inset-0 opacity-40" />
+      <div className="pointer-events-none absolute -left-40 top-20 h-80 w-80 rounded-full bg-emerald-500/8 blur-[100px]" />
+      <Container className="relative">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
+          <div>
+            <SectionIndex index="01" label="Why Synergy Brix" />
+            <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+              A partner built for <span className="font-serif-display italic text-emerald-200/90">long-term</span> value.
+            </h2>
+            <p className="mt-6 max-w-md text-base leading-7 text-slate-400">
+              We combine disciplined engineering with genuine business understanding, so the technology we build keeps working as you grow.
+            </p>
+            <div className="mt-10 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/3 px-4 py-2 text-xs font-mono uppercase tracking-[0.18em] text-emerald-200/80">
+              <span className="status-pulse" />
+              Active for new engagements
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+            <ul className="divide-y divide-white/6">
+              {whyChoose.map((item, i) => (
+                <motion.li
+                  key={item.title}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 0.55, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                  className="group relative grid grid-cols-[auto_1fr_auto] items-center gap-6 py-6 transition-colors hover:bg-white/[0.015]"
+                >
+                  <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">
+                    {String(i + 1).padStart(2, '0')}
+                  </div>
+                  <div>
+                    <h3 className="flex items-center gap-3 text-lg font-semibold text-white">
+                      <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/10 bg-white/3 text-emerald-300 transition-all duration-500 group-hover:border-emerald-400/40 group-hover:bg-emerald-500/10 group-hover:scale-110 group-hover:-rotate-3">
+                        <item.Icon size={16} />
+                      </span>
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 max-w-xl text-sm leading-7 text-slate-400">{item.text}</p>
+                  </div>
+                  <div className="text-slate-500 transition-all duration-500 group-hover:translate-x-1 group-hover:text-emerald-300">
+                    <ArrowUpRight size={20} />
+                  </div>
+                </motion.li>
+              ))}
+            </ul>
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+          </div>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ============================================================================
+ * Technology Stack — refined grid with chips
+ * ========================================================================= */
+
+const techCategories = [
+  { title: 'Frontend', items: ['React', 'Next.js', 'TypeScript', 'JavaScript'] },
+  { title: 'Backend', items: ['Java', 'Spring Boot', 'Node.js', 'REST APIs'] },
+  { title: 'Database', items: ['PostgreSQL', 'MySQL', 'MongoDB'] },
+  { title: 'Cloud & DevOps', items: ['Docker', 'CI/CD', 'Vercel', 'Cloud Deployment'] },
+]
+
+export function TechnologyStack() {
+  return (
+    <section className="relative overflow-hidden bg-ink-900 py-24 lg:py-32">
+      <div className="pointer-events-none absolute -right-40 bottom-0 h-80 w-80 rounded-full bg-teal-500/8 blur-[100px]" />
+      <Container className="relative">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <SectionIndex index="06" label="Technology" />
+            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+              A modern, <span className="font-serif-display italic text-emerald-200/90">pragmatic</span> stack.
+            </h2>
+          </div>
+          <p className="max-w-md text-base leading-7 text-slate-400 lg:text-right">
+            We choose technologies based on project needs — prioritizing scalability, maintainability, and long-term business value.
+          </p>
+        </div>
+
+        <div className="mt-16 grid gap-5 md:grid-cols-2">
+          {techCategories.map((cat, ci) => (
+            <motion.div
+              key={cat.title}
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.55, delay: ci * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              className="card-lift glass-panel relative-sweep relative overflow-hidden rounded-3xl p-7"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">{cat.title}</h3>
+                <span className="font-mono text-[0.7rem] text-slate-600">{String(ci + 1).padStart(2, '0')}</span>
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {cat.items.map((tech) => (
+                  <span
+                    key={tech}
+                    className="group inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/3 px-3.5 py-2 text-sm font-medium text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-400/30 hover:bg-emerald-500/8 hover:text-emerald-200"
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-500 transition-all duration-300 group-hover:bg-emerald-400 group-hover:shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ============================================================================
+ * Big background text (decorative)
+ * ========================================================================= */
+
+export function BgText({ children, className = '' }: { children: string; className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`bg-text font-display ${className}`}
+      style={{ fontSize: 'clamp(8rem, 18vw, 22rem)', lineHeight: 0.85 }}
+    >
+      {children}
+    </div>
   )
 }

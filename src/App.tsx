@@ -1,8 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, MotionConfig } from 'framer-motion'
-import { ArrowRight, ChevronDown, Check, Menu, X, Building2, Sparkles, Code2, Mail, Phone, MapPin, Cloud, Database, BarChart3, Workflow, Globe2, Boxes, Compass, Rocket, Headphones } from 'lucide-react'
-import { FaLinkedinIn, FaGithub } from "react-icons/fa";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, MotionConfig, useMotionValue, useMotionTemplate, useReducedMotion } from 'framer-motion'
+import {
+  ArrowRight,
+  ArrowUpRight,
+  ChevronDown,
+  Check,
+  Sparkles,
+  Code2,
+  Mail,
+  Phone,
+  MapPin,
+  Cloud,
+  Database,
+  BarChart3,
+  Workflow,
+  Globe2,
+  Boxes,
+  Compass,
+  Rocket,
+  Headphones,
+  Plus,
+  Minus,
+  Building2,
+} from 'lucide-react'
+import { FaLinkedinIn, FaGithub } from 'react-icons/fa'
 import {
   blogPosts,
   caseStudies,
@@ -13,15 +35,39 @@ import {
   homeSolutions,
   industries,
   pageMeta,
-  processSteps,
   services,
   solutions,
-  technologyGroups,
 } from './data/siteData'
 import { usePageMeta } from './hooks/usePageMeta'
-import { PointerParallax, HowWeWork, WhyChoose, TechnologyStack, FloatingContactButton } from './components/premium'
+import {
+  PointerParallax,
+  HowWeWork,
+  WhyChoose,
+  TechnologyStack,
+  FloatingContactButton,
+  HeroFloatingCards,
+  RevealText,
+  Magnetic,
+  Marquee,
+  Cursor,
+  BgText,
+  SectionIndex,
+} from './components/premium'
 
-const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfULk7ZMRSZ9krewdbd1elEYa8jLu0qmj3051MAKiYAqxCHcw/viewform?usp=header'
+const GOOGLE_FORM_URL =
+  'https://docs.google.com/forms/d/e/1FAIpQLSfULk7ZMRSZ9krewdbd1elEYa8jLu0qmj3051MAKiYAqxCHcw/viewform?usp=header'
+
+const ALL_NAV = [
+  { label: 'Home', id: 'home', to: '/' },
+  { label: 'Services', id: 'services', to: '/services' },
+  { label: 'Solutions', id: 'solutions', to: '/solutions' },
+  { label: 'Work', id: 'work', to: '/work' },
+  { label: 'About', id: 'about', to: '/about' },
+]
+
+/* ============================================================================
+ * App shell
+ * ========================================================================= */
 
 function App() {
   return (
@@ -38,7 +84,10 @@ function AppShell() {
 
   useEffect(() => {
     if (location.pathname === '/' && location.hash) {
-      window.setTimeout(() => document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'auto', block: 'start' }), 0)
+      window.setTimeout(
+        () => document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'auto', block: 'start' }),
+        0,
+      )
       return
     }
     window.scrollTo({ top: 0, behavior: 'auto' })
@@ -46,6 +95,7 @@ function AppShell() {
 
   return (
     <>
+      <Cursor />
       <Preloader />
       <ScrollProgress />
       <Navbar />
@@ -56,7 +106,7 @@ function AppShell() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
           >
             <Routes location={location}>
               <Route path="/" element={<HomePage />} />
@@ -87,13 +137,9 @@ function AppShell() {
   )
 }
 
-const landingNavigation = [
-  { label: 'Home', id: 'home' },
-  { label: 'Services', id: 'services' },
-  { label: 'Solutions', id: 'solutions' },
-  { label: 'Work', id: 'work' },
-  { label: 'About', id: 'about' },
-]
+/* ============================================================================
+ * Navbar — premium floating, transparent → floating container
+ * ========================================================================= */
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -101,26 +147,40 @@ function Navbar() {
   const [isCompact, setIsCompact] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (isOpen) {
       const prev = document.body.style.overflow
       document.body.style.overflow = 'hidden'
-      return () => { document.body.style.overflow = prev }
+      return () => {
+        document.body.style.overflow = prev
+      }
     }
   }, [isOpen])
-  const navigate = useNavigate()
 
   useEffect(() => {
-    const updateHeader = () => setIsCompact(window.scrollY > 24)
-    updateHeader()
-    window.addEventListener('scroll', updateHeader, { passive: true })
-    return () => window.removeEventListener('scroll', updateHeader)
+    if (!isOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+        setIsServicesOpen(false)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isOpen])
+
+  useEffect(() => {
+    const update = () => setIsCompact(window.scrollY > 40)
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
   }, [])
 
   useEffect(() => {
     if (location.pathname !== '/') return
-    const sections = landingNavigation
+    const sections = ALL_NAV
       .map(({ id }) => document.getElementById(id))
       .filter((section): section is HTMLElement => Boolean(section))
     const observer = new IntersectionObserver(
@@ -149,295 +209,356 @@ function Navbar() {
   }
 
   return (
-    <header className={`sticky top-0 z-50 border-b border-white/10 bg-slate-950/85 backdrop-blur-xl transition-all duration-300 ${isCompact ? 'shadow-[0_10px_30px_rgba(2,6,23,0.28)]' : ''}`}>
-      <div className={`mx-auto flex max-w-7xl items-center justify-between px-4 transition-all duration-500 sm:px-6 lg:px-8 ${isCompact ? 'py-2.5' : 'py-4'}`}>
-        <Link to="/" aria-label="Synergy Brix home" className="group flex items-center gap-3">
-          <BrandLogo className="transition-transform duration-500 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(16,185,129,0.45)]" />
-          <div className="leading-tight">
-            <div className="text-lg font-semibold tracking-tight text-white">Synergy Brix</div>
-          </div>
-        </Link>
-
-        <nav className="hidden items-center gap-6 lg:flex" aria-label="Main navigation">
-          {landingNavigation.map((item) => item.id === 'services' ? (
-            <div key={item.id} className="relative">
-              <button type="button" aria-expanded={isServicesOpen} aria-haspopup="menu" onClick={() => setIsServicesOpen((open) => !open)} className={`relative flex items-center gap-1 py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-300 ${location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'}`}>
-                Services <ChevronDown size={14} className={`transition-transform duration-200 ${isServicesOpen ? 'rotate-180' : ''}`} />
-                <span className={`absolute bottom-0 left-0 h-px bg-emerald-300 transition-all duration-300 ${location.pathname === '/' && activeSection === item.id ? 'w-full' : 'w-0'}`} />
-              </button>
-              {isServicesOpen && <div className="absolute left-1/2 top-full mt-3 w-72 -translate-x-1/2 rounded-2xl border border-slate-700/80 bg-slate-900/95 p-2 shadow-[0_18px_48px_rgba(2,6,23,.45)] backdrop-blur-xl" role="menu">
-                <Link to="/services" onClick={() => setIsServicesOpen(false)} className="mb-1 block rounded-xl border border-emerald-400/15 bg-emerald-500/10 px-3 py-2 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/15">All services</Link>
-                {services.map((service) => <Link key={service.slug} to={`/services/${service.slug}`} onClick={() => setIsServicesOpen(false)} className="block rounded-xl px-3 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white" role="menuitem">{service.title}</Link>)}
-              </div>}
-            </div>
-          ) : (
-            <button key={item.id} type="button" onClick={() => goToSection(item.id)} className={`relative py-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-300 ${location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'}`}>
-              {item.label}
-              <span className={`absolute bottom-0 left-0 h-px bg-emerald-300 transition-all duration-300 ${location.pathname === '/' && activeSection === item.id ? 'w-full' : 'w-0'}`} />
-            </button>
-          ))}
-        </nav>
-
-        <div className="hidden items-center gap-3 lg:flex">
-          <LinkButton to={GOOGLE_FORM_URL} variant="primary">Start a Project</LinkButton>
-        </div>
-
-        <button
-          type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-900/70 text-slate-200 shadow-sm lg:hidden"
-          aria-expanded={isOpen}
-          aria-label="Open menu"
-          onClick={() => setIsOpen((value) => !value)}
+    <>
+      <motion.header
+        initial={false}
+        animate={{
+          y: 0,
+        }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed left-0 right-0 top-0 z-50 flex justify-center"
+        style={{ pointerEvents: 'none' }}
+      >
+        <motion.div
+          initial={false}
+          animate={{
+            width: isCompact ? 'min(94%, 1100px)' : 'min(96%, 1280px)',
+            paddingTop: isCompact ? 10 : 18,
+            paddingBottom: isCompact ? 10 : 18,
+            backgroundColor: isCompact ? 'rgba(6, 8, 11, 0.72)' : 'rgba(6, 8, 11, 0)',
+            borderColor: isCompact ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0)',
+            backdropFilter: isCompact ? 'blur(18px) saturate(150%)' : 'blur(0px)',
+          }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="relative flex items-center justify-between rounded-full border px-5 sm:px-7"
+          style={{ pointerEvents: 'auto' }}
         >
-          {isOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-      </div>
+          <Link to="/" data-cursor="hover" aria-label="Synergy Brix home" className="group flex items-center gap-2.5">
+            <BrandLogo />
+            <div className="leading-none">
+              <div className="text-[0.95rem] font-semibold tracking-tight text-white">Synergy Brix</div>
+              <div className="mt-0.5 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-emerald-300/70">
+                <span className="status-pulse mr-1.5 align-middle" />
+                online
+              </div>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-7 lg:flex" aria-label="Main navigation">
+            {ALL_NAV.map((item) =>
+              item.id === 'services' ? (
+                <div key={item.id} className="relative">
+                  <button
+                    type="button"
+                    aria-expanded={isServicesOpen}
+                    aria-haspopup="menu"
+                    onClick={() => setIsServicesOpen((open) => !open)}
+                    data-cursor="hover"
+                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${
+                      location.pathname.startsWith('/services') ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
+                    }`}
+                    data-active={location.pathname.startsWith('/services') || undefined}
+                  >
+                    {item.label}
+                    <ChevronDown size={13} className={`transition-transform duration-300 ${isServicesOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isServicesOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                      className="glass-panel absolute left-1/2 top-full mt-3 w-80 -translate-x-1/2 overflow-hidden rounded-2xl p-1.5 shadow-panel"
+                      role="menu"
+                    >
+                      <Link
+                        to="/services"
+                        onClick={() => setIsServicesOpen(false)}
+                        className="mb-1 flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/8 px-3 py-2.5 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/14"
+                        role="menuitem"
+                      >
+                        All services
+                        <ArrowUpRight size={14} />
+                      </Link>
+                      {services.map((service) => (
+                        <Link
+                          key={service.slug}
+                          to={`/services/${service.slug}`}
+                          onClick={() => setIsServicesOpen(false)}
+                          className="flex items-center justify-between rounded-xl px-3 py-2 text-sm text-slate-300 transition hover:bg-white/4 hover:text-white"
+                          role="menuitem"
+                        >
+                          {service.title}
+                          <ArrowUpRight size={12} className="opacity-0 transition group-hover:opacity-100" />
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => goToSection(item.id)}
+                  data-cursor="hover"
+                  className={`nav-underline text-[0.85rem] font-medium transition-colors ${
+                    location.pathname === '/' && activeSection === item.id
+                      ? 'text-emerald-300'
+                      : location.pathname.startsWith(item.to) && item.to !== '/'
+                      ? 'text-emerald-300'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                  data-active={
+                    (location.pathname === '/' && activeSection === item.id) ||
+                    (item.to !== '/' && location.pathname.startsWith(item.to)) ||
+                    undefined
+                  }
+                >
+                  {item.label}
+                </button>
+              ),
+            )}
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <div className="hidden lg:block">
+              <Magnetic>
+                <LinkButton href={GOOGLE_FORM_URL} variant="primary" external icon={<ArrowRight size={15} />}>
+                  Start a Project
+                </LinkButton>
+              </Magnetic>
+            </div>
+            <button
+              type="button"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/3 text-slate-200 transition hover:border-white/20 hover:bg-white/6 lg:hidden"
+              aria-expanded={isOpen}
+              aria-label="Open menu"
+              onClick={() => setIsOpen((v) => !v)}
+            >
+              <span className="sr-only">Menu</span>
+              <span className="relative block h-3.5 w-4">
+                <motion.span
+                  className="absolute left-0 right-0 top-0 h-px bg-current"
+                  animate={isOpen ? { rotate: 45, y: 6 } : { rotate: 0, y: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                />
+                <motion.span
+                  className="absolute left-0 right-0 bottom-0 h-px bg-current"
+                  animate={isOpen ? { rotate: -45, y: -6 } : { rotate: 0, y: 0 }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                />
+              </span>
+            </button>
+          </div>
+        </motion.div>
+      </motion.header>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-t border-slate-800 bg-slate-950/95 backdrop-blur-xl lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 z-40 bg-ink-950/95 backdrop-blur-2xl lg:hidden"
           >
-            <div className="mx-auto max-w-7xl space-y-2 px-4 py-4 sm:px-6">
-              {landingNavigation.map((item) => item.id === 'services' ? (
-                <div key={item.id} className="rounded-xl border border-slate-800 bg-slate-900/40 p-1">
-                  <div className="flex items-center justify-between"><button type="button" onClick={() => goToSection(item.id)} className="px-2 py-2.5 text-left text-sm font-medium text-emerald-200">Services</button><button type="button" aria-label="Toggle services menu" aria-expanded={isServicesOpen} onClick={() => setIsServicesOpen((open) => !open)} className="p-2 text-slate-300"><ChevronDown size={17} className={isServicesOpen ? 'rotate-180' : ''} /></button></div>
-                  {isServicesOpen && <div className="border-t border-slate-800 px-1 py-2">{services.map((service) => <Link key={service.slug} to={`/services/${service.slug}`} onClick={() => { setIsOpen(false); setIsServicesOpen(false) }} className="block rounded-lg px-2 py-2 text-sm text-slate-300 transition hover:bg-white/5 hover:text-white">{service.title}</Link>)}</div>}
+            <div className="flex h-full flex-col overflow-y-auto px-6 pb-12 pt-28">
+              <motion.nav
+                initial="hidden"
+                animate="show"
+                variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06, delayChildren: 0.1 } } }}
+                className="space-y-2"
+              >
+                {ALL_NAV.map((item) => (
+                  <motion.div
+                    key={item.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => goToSection(item.id)}
+                      className="flex w-full items-end justify-between border-b border-white/6 py-5 text-left"
+                    >
+                      <span className="text-3xl font-semibold tracking-tightest text-white">{item.label}</span>
+                      <ArrowUpRight className="text-slate-500" />
+                    </button>
+                  </motion.div>
+                ))}
+              </motion.nav>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.5 } }}
+                className="mt-8"
+              >
+                <h4 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Services</h4>
+                <div className="mt-3 grid grid-cols-1 gap-1">
+                  {services.map((service) => (
+                    <Link
+                      key={service.slug}
+                      to={`/services/${service.slug}`}
+                      onClick={() => setIsOpen(false)}
+                      className="rounded-lg px-3 py-2 text-sm text-slate-300 transition hover:bg-white/4 hover:text-white"
+                    >
+                      {service.title}
+                    </Link>
+                  ))}
                 </div>
-              ) : (
-                <button key={item.id} type="button" onClick={() => goToSection(item.id)} className={`block w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium transition ${location.pathname === '/' && activeSection === item.id ? 'bg-emerald-500/10 text-emerald-200' : 'text-slate-300 hover:bg-slate-900 hover:text-white'}`}>
-                  {item.label}
-                </button>
-              ))}
-              <div className="pt-2">
-                <LinkButton to={GOOGLE_FORM_URL} variant="primary" fullWidth onClick={() => setIsOpen(false)}>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.55, duration: 0.5 } }}
+                className="mt-auto pt-10"
+              >
+                <LinkButton href={GOOGLE_FORM_URL} variant="primary" fullWidth external icon={<ArrowRight size={16} />}>
                   Start a Project
                 </LinkButton>
-              </div>
+                <div className="mt-6 flex items-center gap-4 text-sm text-slate-400">
+                  <a href="mailto:hello@synergybrix.com" className="hover:text-white">hello@synergybrix.com</a>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </>
   )
 }
 
+/* ============================================================================
+ * Footer
+ * ========================================================================= */
+
 function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-slate-800 bg-slate-950 text-slate-200">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.10),transparent_30%)]" />
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr_1.3fr]">
+    <footer className="relative overflow-hidden bg-ink-950 pt-24 text-slate-300">
+      <div className="cta-grid absolute inset-0 opacity-60" />
+      <div className="pointer-events-none absolute -left-32 top-0 h-80 w-80 rounded-full bg-emerald-500/12 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-teal-500/10 blur-[120px]" />
+      <Container className="relative">
+        <div className="grid gap-14 pb-16 lg:grid-cols-[1.3fr_1fr_1.3fr]">
           <div>
-            <Link to="/" className="group mb-5 inline-flex items-center gap-3">
-              <BrandLogo dark className="transition-transform duration-500 group-hover:scale-105 group-hover:shadow-[0_0_24px_rgba(16,185,129,0.4)]" />
-              <div className="text-lg font-semibold text-white">Synergy Brix</div>
+            <Link to="/" className="group inline-flex items-center gap-3">
+              <BrandLogo />
+              <div className="leading-none">
+                <div className="text-[1.05rem] font-semibold tracking-tight text-white">Synergy Brix</div>
+                <div className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/70">Engineering for outcomes</div>
+              </div>
             </Link>
-            <p className="max-w-md text-sm leading-7 text-slate-300">
+            <p className="mt-6 max-w-md text-sm leading-7 text-slate-400">
               Synergy Brix helps businesses modernize operations, build custom software, and engineer scalable digital systems around how work actually happens.
             </p>
           </div>
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">Quick Links</h3>
-            <ul className="flex flex-row flex-wrap items-center gap-4 text-sm text-slate-300">
+            <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Navigate</h3>
+            <ul className="mt-5 flex flex-row flex-wrap items-center gap-x-5 gap-y-3 text-sm text-slate-300">
               {footerLinks.quickLinks.map((link) => (
                 <li key={link.to}>
-                  <Link to={link.to} className="group relative transition hover:text-white">
+                  <Link to={link.to} data-cursor="hover" className="group relative inline-flex items-center gap-1.5 transition hover:text-white">
                     {link.label}
-                    <span className="absolute -bottom-1 left-0 h-px w-0 bg-emerald-300 transition-all duration-300 group-hover:w-full" />
+                    <ArrowUpRight size={12} className="opacity-0 transition group-hover:opacity-100" />
+                    <span className="pointer-events-none absolute -bottom-1 left-0 h-px w-0 bg-emerald-300 transition-all duration-500 group-hover:w-full" />
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
           <div>
-            <h3 className="mb-4 text-sm font-semibold uppercase tracking-[0.16em] text-emerald-200">Connect</h3>
-            <ul className="space-y-3 text-sm text-slate-300">
-              <li className="flex items-center gap-2"><Mail size={16} className="text-emerald-300" /> @synergybrix.com</li>
-              <li className="flex items-center gap-2"><Phone size={16} className="text-emerald-300" /> +91 00000 00000</li>
-              <li className="flex items-center gap-2"><MapPin size={16} className="text-emerald-300" /> India • Remote-ready</li>
+            <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Connect</h3>
+            <ul className="mt-5 space-y-3 text-sm text-slate-300">
+              <li className="flex items-center gap-2.5"><Mail size={15} className="text-emerald-300" /> hello@synergybrix.com</li>
+              <li className="flex items-center gap-2.5"><Phone size={15} className="text-emerald-300" /> +91 00000 00000</li>
+              <li className="flex items-center gap-2.5"><MapPin size={15} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
-            <div className="mt-5 flex gap-3">
+            <div className="mt-6 flex gap-3">
               {footerLinks.social.map((social) => (
                 <a
                   key={social.label}
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-700 text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-200 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]"
+                  data-cursor="hover"
+                  className="group inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-slate-300 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-400/40 hover:bg-emerald-500/8 hover:text-emerald-200"
                   aria-label={social.label}
                 >
-                  {social.label.toLowerCase().includes("linkedin") ? (
-                    <FaLinkedinIn size={18} className="transition-transform duration-300 group-hover:scale-110" />
+                  {social.label.toLowerCase().includes('linkedin') ? (
+                    <FaLinkedinIn size={16} className="transition-transform duration-300 group-hover:scale-110" />
                   ) : (
-                    <FaGithub size={18} className="transition-transform duration-300 group-hover:scale-110" />
+                    <FaGithub size={16} className="transition-transform duration-300 group-hover:scale-110" />
                   )}
                 </a>
               ))}
             </div>
           </div>
         </div>
-        <div className="mt-10 border-t border-slate-800 pt-6 text-sm text-slate-400">
-          © 2026 Synergy Brix. All rights reserved.
+
+        <div className="section-divider" />
+
+        <div className="flex flex-col items-start justify-between gap-4 py-6 sm:flex-row sm:items-center">
+          <div className="text-sm text-slate-500">© 2026 Synergy Brix. All rights reserved.</div>
+          <div className="flex items-center gap-5 text-xs text-slate-500">
+            <Link to="/privacy" className="hover:text-slate-300">Privacy</Link>
+            <Link to="/terms" className="hover:text-slate-300">Terms</Link>
+            <span className="hidden sm:inline">Built with discipline.</span>
+          </div>
         </div>
-      </div>
+      </Container>
     </footer>
   )
 }
+
+/* ============================================================================
+ * Home Page
+ * ========================================================================= */
+
+const HERO_PILLARS = ['Custom software', 'Automation', 'APIs', 'Cloud', 'Dashboards']
 
 function HomePage() {
   usePageMeta(pageMeta.home)
 
   return (
     <>
-      <section id="home" className="relative overflow-hidden bg-slate-950">
-        <div className="mesh-bg absolute inset-0" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.18),transparent_26%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.12),transparent_25%)]" />
-        <HeroOrbs />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.18]" style={{ backgroundImage: 'radial-gradient(rgba(167,243,208,0.5) 1px, transparent 1px)', backgroundSize: '38px 38px', maskImage: 'radial-gradient(circle at center, black 10%, transparent 75%)' }} />
-        <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
-          <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.11 } } }}>
-            <motion.div variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.5 }} className="mb-5 flex items-center gap-3">
-              <HeroBrandMark />
-              <span className="section-tag inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
-                <Sparkles size={14} className="text-emerald-300" />
-                Technology built for real business needs
-              </span>
-            </motion.div>
-            <motion.h1 variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.65 }} className="max-w-2xl text-4xl font-semibold leading-[1.04] tracking-[-0.065em] text-white sm:text-5xl lg:text-6xl">
-              Building digital solutions that move your business forward.
-            </motion.h1>
-            <motion.p variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
-              Custom software, business automation, web applications, and digital systems designed around the way your business actually works.
-            </motion.p>
-            <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <LinkButton to={GOOGLE_FORM_URL} variant="primary" icon={<ArrowRight size={18} />}>Start a Project</LinkButton>
-              <LinkButton to="/services" variant="secondary-light">Explore Our Services</LinkButton>
-            </motion.div>
-            <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
-              {['Custom software', 'Automation', 'APIs', 'Cloud', 'Dashboards'].map((item) => (
-                <span key={item} className="rounded-full border border-slate-700/80 bg-slate-900/40 px-3 py-1.5 backdrop-blur-sm">
-                  {item}
-                </span>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          <PointerParallax strength={16} className="relative">
-            <motion.div initial={{ opacity: 0, scale: 0.94, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.75, ease: 'easeOut' }} className="relative">
-              <ArchitectureVisual />
-            </motion.div>
-          </PointerParallax>
-        </Container>
-        <ScrollIndicator />
-      </section>
-
+      <Hero />
+      <Marquee
+        items={[
+          'Custom Software',
+          'Web Applications',
+          'APIs & Integrations',
+          'Business Automation',
+          'Dashboards & Reporting',
+          'SaaS Platforms',
+          'Cloud Architecture',
+          'Database Systems',
+        ]}
+        className="border-y border-white/6 bg-ink-950 py-5"
+      />
       <WhyChoose />
-
-      <Section id="services" background="soft">
-        <Container>
-          <div className="flex items-end justify-between gap-3">
-            <SectionHeading eyebrow="Services" title="What we build" description="Focused software capabilities for businesses that need reliable digital systems." />
-            <LinkButton to="/services" variant="secondary">Explore Our Services</LinkButton>
-          </div>
-          <div className="mt-10 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((service) => (
-              <ServiceCard key={service.slug} service={service} />
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      <Section>
-        <Container>
-          <SectionHeading eyebrow="Business value" title="Problems we solve" description="We don’t add technology for the sake of it. We solve real business challenges by removing friction and improving operations." />
-          <div className="mt-10 grid gap-5 lg:grid-cols-2">
-            {homeProblems.map((problem) => (
-              <div key={problem.question} className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:border-emerald-200 hover:shadow-md">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-900"><Check size={15} /></div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900">{problem.question}</h3>
-                    <div className="mt-2 flex items-center gap-2 text-sm font-medium text-emerald-800"><ArrowRight size={15} /><span>Technology solution</span></div>
-                    <p className="mt-1 text-slate-600">{problem.answer}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      <Section id="solutions" background="soft">
-        <Container>
-          <SectionHeading eyebrow="Solutions" title="Business systems that create clarity and momentum" description="We design digital tools around the outcomes businesses need: smoother operations, better reporting, and scalable internal capability." />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-5">
-            {homeSolutions.map((solution) => (
-              <div key={solution} className="rounded-2xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-700 shadow-sm">
-                {solution}
-              </div>
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      <Section>
-        <Container>
-          <SectionHeading eyebrow="Industries" title="Business environments we support" description="We help organizations solve operational pain points with flexible digital systems suited to their domain." />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {industries.map((industry) => (
-              <IndustryCard key={industry.title} industry={industry} />
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      <TechnologyStack />
-
+      <ServicesSpotlight />
+      <ProblemsSection />
+      <SolutionsBento />
+      <IndustriesSection />
       <HowWeWork />
-
-      <Section id="about" background="soft">
-        <Container>
-          <SectionHeading eyebrow="About Synergy Brix" title="Structured for long-term business value" description="We are a software engineering partner focused on the realities of your operations, your teams, and your future growth." />
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {companyValues.map((value) => (
-              <div key={value} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50 text-emerald-900"><Check size={14} /></div>
-                <span className="text-sm font-medium text-slate-700">{value}</span>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      <Section id="work">
-        <Container>
-          <SectionHeading eyebrow="Work" title="Selected demonstration projects" description="We are building reusable case-study formats so real projects can be added easily and clearly as they become available." />
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
-            {caseStudies.map((project) => (
-              <CaseStudyCard key={project.slug} item={project} />
-            ))}
-          </div>
-        </Container>
-      </Section>
-
-      <div id="contact">
+      <TechnologyStack />
+      <AboutValuesSection />
+      <SelectedWork />
+      <InsightsPreview />
+      <FAQPreview />
       <CTASection
-        title="Have an Idea Worth Building?"
-        description="Turn your idea into a scalable digital solution with Synergy Brix."
-        primaryLabel="Start a Project"
+        title="Have an idea worth building?"
+        description="Let's turn it into a powerful digital solution."
+        primaryLabel="Start Your Project"
         secondaryLabel="Talk to Us"
         primaryHref={GOOGLE_FORM_URL}
         secondaryHref={GOOGLE_FORM_URL}
       />
-      </div>
     </>
   )
 }
+
+/* ----- Hero ----- */
 
 const architectureNodes = [
   { label: 'Web Apps', icon: Globe2, position: 'node-web' },
@@ -462,7 +583,16 @@ function ArchitectureVisual() {
             <stop offset="1" stopColor="#34d399" stopOpacity=".12" />
           </linearGradient>
         </defs>
-        {['M286 239 C235 194 185 152 130 116', 'M316 239 C366 191 414 148 474 116', 'M270 273 C205 286 146 308 98 326', 'M330 273 C389 296 437 319 489 348', 'M284 285 C264 342 232 394 200 435', 'M320 285 C356 340 395 393 435 430'].map((path) => <path key={path} className="architecture-link" d={path} />)}
+        {[
+          'M286 239 C235 194 185 152 130 116',
+          'M316 239 C366 191 414 148 474 116',
+          'M270 273 C205 286 146 308 98 326',
+          'M330 273 C389 296 437 319 489 348',
+          'M284 285 C264 342 232 394 200 435',
+          'M320 285 C356 340 395 393 435 430',
+        ].map((path) => (
+          <path key={path} className="architecture-link" d={path} />
+        ))}
         <circle className="architecture-particle particle-web" cx="286" cy="239" r="3" />
         <circle className="architecture-particle particle-api" cx="316" cy="239" r="3" />
         <circle className="architecture-particle particle-automation" cx="270" cy="273" r="3" />
@@ -474,109 +604,758 @@ function ArchitectureVisual() {
       <div className="architecture-core">
         <div className="architecture-core-orbit" />
         <div className="architecture-core-inner">
-          <span className="text-[9px] font-semibold uppercase tracking-[0.24em] text-emerald-200/80">Connected by</span>
+          <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-emerald-200/80">Connected by</span>
           <span className="mt-1 block text-lg font-semibold tracking-[-0.04em] text-white">Synergy Brix</span>
-          <span className="mt-2 flex items-center justify-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-emerald-300"><i className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" />System core</span>
+          <span className="mt-2 flex items-center justify-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-emerald-300">
+            <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> System core
+          </span>
         </div>
       </div>
 
       {architectureNodes.map(({ label, icon: Icon, position }) => (
         <div key={label} className={`architecture-node ${position}`}>
-          <div className="architecture-node-icon"><Icon size={18} strokeWidth={1.8} /></div>
+          <div className="architecture-node-icon">
+            <Icon size={18} strokeWidth={1.8} />
+          </div>
           <span>{label}</span>
         </div>
       ))}
-      <div className="architecture-caption"><span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Business systems, connected with intent</div>
+      <div className="architecture-caption">
+        <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Business systems, connected with intent
+      </div>
     </div>
   )
 }
 
-function AboutPage() {
-  usePageMeta(pageMeta.about)
+function Hero() {
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, 100])
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -70])
+  const y3 = useTransform(scrollYProgress, [0, 1], [0, 50])
+  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
+  const cursorGlowX = useMotionValue(50)
+  const cursorGlowY = useMotionValue(40)
+  const reduce = useReducedMotionSafe()
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (reduce) return
+    if (!window.matchMedia('(pointer: fine)').matches) return
+    const onMove = (e: MouseEvent) => {
+      if (!containerRef.current) return
+      const rect = containerRef.current.getBoundingClientRect()
+      const x = ((e.clientX - rect.left) / rect.width) * 100
+      const y = ((e.clientY - rect.top) / rect.height) * 100
+      cursorGlowX.set(x)
+      cursorGlowY.set(y)
+    }
+    window.addEventListener('mousemove', onMove, { passive: true })
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [cursorGlowX, cursorGlowY, reduce])
 
   return (
-    <PageShell title="Who We Are" subtitle="Synergy Brix is a software engineering partner for companies that need dependable digital systems, practical business logic, and scalable solutions." description="We act as a collaborative technology partner focused on solving real business problems with clear engineering and disciplined execution.">
-      <div className="grid gap-8 lg:grid-cols-2">
-        <InfoPanel title="Our Mission" text="To help businesses build reliable technology that supports growth, improves efficiency, and makes operations more confident and predictable." />
-        <InfoPanel title="Our Vision" text="To be a trusted technology partner for organizations that need strong engineering, thoughtful architecture, and business-aligned digital transformation." />
-        <InfoPanel title="Our Approach" text="We take a practical, structured approach: understand the problem, design the right solution, and build technology that fits the way your business actually works." />
-        <InfoPanel title="Engineering Principles" text="We focus on maintainability, clarity, scalability, security, and communication so technology stays useful as the business changes." />
-      </div>
-      <div className="mt-10 rounded-3xl border border-slate-200 bg-emerald-50 p-8">
-        <h3 className="text-2xl font-semibold text-slate-900">Why We Build</h3>
-        <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-700">
-          We believe digital systems should create clarity, reduce friction, and unlock business opportunity. We build software that helps teams work smarter, serve customers better, and adapt with confidence.
-        </p>
-      </div>
-    </PageShell>
+    <section
+      id="home"
+      ref={ref}
+      className="surface-canvas relative overflow-hidden pt-32 pb-20 sm:pt-40 lg:min-h-screen lg:pt-44 lg:pb-28"
+    >
+      <div className="mesh-bg absolute inset-0" />
+      <BgText className="-top-8 left-1/2 -translate-x-1/2 select-none">Synergy</BgText>
+
+      {/* Cursor glow */}
+      <motion.div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background: useMotionTemplate`radial-gradient(600px circle at ${cursorGlowX}% ${cursorGlowY}%, rgba(52, 211, 153, 0.12), transparent 50%)`,
+        }}
+      />
+      {/* Ambient blobs with scroll parallax */}
+      <motion.div style={{ y: y1 }} className="animate-blob-1 pointer-events-none absolute -left-24 top-32 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
+      <motion.div style={{ y: y2 }} className="animate-blob-2 pointer-events-none absolute right-0 top-44 h-80 w-80 rounded-full bg-teal-400/12 blur-3xl" />
+      <motion.div style={{ y: y3 }} className="animate-blob-1 pointer-events-none absolute bottom-20 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+
+      <Container className="relative">
+        <motion.div ref={containerRef} style={{ opacity }} className="grid items-center gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
+          <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.09 } } }}>
+            <motion.div
+              variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+              className="flex flex-wrap items-center gap-3"
+            >
+              <HeroBrandMark />
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-white/4 px-3 py-1.5 text-[0.78rem] font-medium text-emerald-100 backdrop-blur-sm">
+                <Sparkles size={12} className="text-emerald-300" />
+                Technology built for real business needs
+              </span>
+            </motion.div>
+
+            <h1 className="mt-7 max-w-3xl text-[clamp(2.6rem,6vw,5.25rem)] font-semibold leading-[0.98] tracking-tightest text-white">
+              <RevealText as="span" delay={0.05} className="block">Building digital</RevealText>
+              <RevealText as="span" delay={0.18} className="block">systems that</RevealText>
+              <span className="block">
+                <RevealText as="span" delay={0.32} className="text-emerald-200/90 font-serif-display italic">actually move</RevealText>
+                <RevealText as="span" delay={0.46} className="text-white"> your</RevealText>
+              </span>
+              <RevealText as="span" delay={0.58} className="block">business forward.</RevealText>
+            </h1>
+
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.7 } } }}
+              className="mt-7 max-w-xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8"
+            >
+              Custom software, business automation, web applications, and digital systems — designed around the way your business actually works.
+            </motion.p>
+
+            <motion.div
+              variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+              className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center"
+            >
+              <Magnetic>
+                <LinkButton href={GOOGLE_FORM_URL} variant="primary" external icon={<ArrowRight size={16} className="arrow-shift" />}>
+                  Start a Project
+                </LinkButton>
+              </Magnetic>
+              <Magnetic>
+                <LinkButton href="/services" variant="secondary">
+                  Explore Our Services
+                </LinkButton>
+              </Magnetic>
+            </motion.div>
+
+            <motion.div
+              variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+              className="mt-10 flex flex-wrap gap-2 text-sm"
+            >
+              {HERO_PILLARS.map((item) => (
+                <span
+                  key={item}
+                  className="rounded-full border border-white/8 bg-white/3 px-3.5 py-1.5 text-slate-300 backdrop-blur-sm transition hover:border-emerald-400/30 hover:bg-emerald-500/6 hover:text-emerald-200"
+                >
+                  {item}
+                </span>
+              ))}
+            </motion.div>
+          </motion.div>
+
+          <PointerParallax strength={18} className="relative">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.94, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              className="relative"
+            >
+              <ArchitectureVisual />
+            </motion.div>
+            <HeroFloatingCards />
+          </PointerParallax>
+        </motion.div>
+
+        <ScrollIndicator />
+      </Container>
+    </section>
+  )
+}
+
+/* ----- Services Spotlight (sticky scroll interaction) ----- */
+
+function ServicesSpotlight() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const itemRefs = useRef<(HTMLLIElement | null)[]>([])
+  const [activeIdx, setActiveIdx] = useState(0)
+
+  useEffect(() => {
+    if (!sectionRef.current) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
+        if (visible) {
+          const idx = Number((visible.target as HTMLElement).dataset.idx)
+          if (!Number.isNaN(idx)) setActiveIdx(idx)
+        }
+      },
+      { rootMargin: '-40% 0px -40% 0px', threshold: [0.05, 0.2, 0.5] },
+    )
+    itemRefs.current.forEach((el) => el && observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
+  const active = services[activeIdx]
+
+  return (
+    <section id="services" ref={sectionRef} className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+      <div className="dotted-grid pointer-events-none absolute inset-0 opacity-30" />
+      <div className="pointer-events-none absolute -right-40 top-1/4 h-80 w-80 rounded-full bg-emerald-500/10 blur-[120px]" />
+      <Container className="relative">
+        <div className="grid items-end gap-10 lg:grid-cols-[1fr_auto]">
+          <div>
+            <SectionIndex index="02" label="Services" />
+            <h2 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+              What we build, <span className="font-serif-display italic text-emerald-200/90">end to end.</span>
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-7 text-slate-400">
+              Focused software capabilities for businesses that need reliable, scalable, and well-engineered digital systems.
+            </p>
+          </div>
+          <LinkButton href="/services" variant="secondary" icon={<ArrowUpRight size={15} />}>
+            All services
+          </LinkButton>
+        </div>
+
+        <div className="mt-16 grid gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
+          {/* Sticky detail panel */}
+          <div className="lg:sticky lg:top-32 lg:self-start">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active.slug}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                className="glass-panel relative overflow-hidden rounded-3xl p-8 lg:p-10"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">
+                    Service · {String(activeIdx + 1).padStart(2, '0')}/{String(services.length).padStart(2, '0')}
+                  </span>
+                  <span className="font-mono text-[0.7rem] text-slate-500">{active.slug}</span>
+                </div>
+                <h3 className="mt-6 text-3xl font-semibold tracking-tightest text-white sm:text-4xl">{active.title}</h3>
+                <p className="mt-4 text-base leading-7 text-slate-300">{active.short}</p>
+                <div className="mt-6 rounded-2xl border border-emerald-400/15 bg-emerald-500/5 p-4">
+                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">Business problem</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{active.problem}</p>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {active.technology.slice(0, 4).map((tech) => (
+                    <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-3 py-1 text-xs text-slate-300">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-8 flex items-center gap-3">
+                  <LinkButton href={`/services/${active.slug}`} variant="primary" icon={<ArrowRight size={15} className="arrow-shift" />}>
+                    Explore service
+                  </LinkButton>
+                  <span className="text-xs text-slate-500">Scroll to see all</span>
+                </div>
+                {/* Decorative gradient */}
+                <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Scrolling list */}
+          <ul className="relative">
+            <div className="absolute left-0 top-0 bottom-0 hidden w-px bg-gradient-to-b from-transparent via-white/10 to-transparent lg:block" />
+            {services.map((service, i) => {
+              const isActive = i === activeIdx
+              return (
+                <li
+                  key={service.slug}
+                  ref={(el) => {
+                    itemRefs.current[i] = el
+                  }}
+                  data-idx={i}
+                  className="relative border-b border-white/6"
+                >
+                  <div className={`relative grid grid-cols-[auto_1fr_auto] items-start gap-5 py-9 transition-all duration-500 lg:pl-10 ${isActive ? 'opacity-100' : 'opacity-60 hover:opacity-90'}`}>
+                    <div className="font-mono text-[0.75rem] tracking-[0.18em] text-emerald-300/80 pt-1.5">
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                    <div>
+                      <h3 className={`text-2xl font-semibold tracking-tightest sm:text-3xl ${isActive ? 'text-white' : 'text-slate-200'}`}>
+                        {service.title}
+                      </h3>
+                      <p className="mt-2 max-w-lg text-sm leading-7 text-slate-400">{service.short}</p>
+                      {isActive && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5 }}
+                          className="mt-4 flex flex-wrap gap-2 lg:hidden"
+                        >
+                          {service.technology.slice(0, 4).map((tech) => (
+                            <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-3 py-1 text-xs text-slate-300">
+                              {tech}
+                            </span>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+                    <div className="pt-2 text-slate-500 transition-all duration-500 group-hover:text-emerald-300">
+                      {isActive ? <ArrowRight size={20} className="text-emerald-300" /> : <Plus size={18} />}
+                    </div>
+                    {isActive && (
+                      <motion.div
+                        layoutId="service-active-bar"
+                        className="absolute -left-px top-9 hidden h-[calc(100%-4.5rem)] w-px bg-gradient-to-b from-emerald-400 via-emerald-300 to-transparent lg:block"
+                        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                      />
+                    )}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- Problems ----- */
+
+function ProblemsSection() {
+  return (
+    <section className="relative overflow-hidden bg-ink-900 py-24 lg:py-32">
+      <div className="paper-grid pointer-events-none absolute inset-0 opacity-60" />
+      <Container className="relative">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.6fr]">
+          <div>
+            <SectionIndex index="03" label="Business value" />
+            <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+              Problems <span className="font-serif-display italic text-emerald-200/90">we solve.</span>
+            </h2>
+            <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
+              We don't add technology for the sake of it. We solve real business challenges by removing friction and improving operations.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {homeProblems.map((problem, i) => (
+              <motion.div
+                key={problem.question}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                className="card-lift group relative overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-5"
+                data-cursor="hover"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-300 transition group-hover:scale-110">
+                    <Check size={14} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-white">{problem.question}</h3>
+                    <div className="mt-3 flex items-center gap-1.5 font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">
+                      <ArrowRight size={11} /> Technology solution
+                    </div>
+                    <p className="mt-1.5 text-sm leading-6 text-slate-300">{problem.answer}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- Solutions bento ----- */
+
+function SolutionsBento() {
+  return (
+    <section id="solutions" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+      <div className="dotted-grid pointer-events-none absolute inset-0 opacity-30" />
+      <div className="pointer-events-none absolute -left-32 top-1/3 h-72 w-72 rounded-full bg-teal-500/10 blur-[100px]" />
+      <Container className="relative">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <SectionIndex index="04" label="Solutions" />
+            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+              Business systems that <span className="font-serif-display italic text-emerald-200/90">create momentum.</span>
+            </h2>
+          </div>
+          <p className="max-w-md text-base leading-7 text-slate-400 lg:text-right">
+            We design digital tools around the outcomes businesses need: smoother operations, better reporting, and scalable internal capability.
+          </p>
+        </div>
+
+        <div className="mt-14 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {homeSolutions.map((solution, i) => (
+            <motion.div
+              key={solution}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: (i % 5) * 0.06 }}
+              data-cursor="hover"
+              className="card-lift group relative overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-4 text-sm font-medium text-slate-200"
+            >
+              <div className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-emerald-300/70">0{i + 1}</div>
+              <div className="mt-3">{solution}</div>
+              <ArrowUpRight size={14} className="mt-4 text-slate-600 transition group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-emerald-300" />
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- Industries ----- */
+
+const INDUSTRY_ICONS: Record<string, typeof Globe2> = {
+  Manufacturing: Workflow,
+  Engineering: Compass,
+  Healthcare: Check,
+  Education: Sparkles,
+  Logistics: Boxes,
+  Retail: BarChart3,
+  'Professional Services': Headphones,
+  'Real Estate': Building2,
+  'Startups & SMEs': Rocket,
+}
+
+function IndustriesSection() {
+  return (
+    <section className="relative overflow-hidden bg-ink-900 py-24 lg:py-32">
+      <div className="paper-grid pointer-events-none absolute inset-0 opacity-50" />
+      <Container className="relative">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.6fr] lg:items-end">
+          <div>
+            <SectionIndex index="05" label="Industries" />
+            <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+              Built for the way <span className="font-serif-display italic text-emerald-200/90">you work.</span>
+            </h2>
+          </div>
+          <p className="max-w-md text-base leading-7 text-slate-400">
+            We help organizations solve operational pain points with flexible digital systems suited to their domain.
+          </p>
+        </div>
+
+        <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {industries.map((industry, i) => {
+            const Icon = INDUSTRY_ICONS[industry.title] || Compass
+            return (
+              <motion.div
+                key={industry.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.55, delay: (i % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                data-cursor="hover"
+                className="card-lift group relative overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="grid h-11 w-11 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-500/8 text-emerald-300 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3 group-hover:border-emerald-400/40">
+                    <Icon size={18} />
+                  </div>
+                  <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-slate-500">
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+                </div>
+                <h3 className="mt-6 text-lg font-semibold text-white">{industry.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-400">{industry.summary}</p>
+                <div className="mt-5 flex items-center gap-2 text-xs text-slate-500 transition group-hover:text-emerald-300">
+                  <span>Domain support</span>
+                  <ArrowRight size={12} />
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- About values (editorial list) ----- */
+
+function AboutValuesSection() {
+  return (
+    <section id="about" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+      <div className="cta-grid pointer-events-none absolute inset-0 opacity-40" />
+      <div className="pointer-events-none absolute right-0 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-emerald-500/8 blur-[100px]" />
+      <Container className="relative">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
+          <div>
+            <SectionIndex index="07" label="About Synergy Brix" />
+            <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+              Structured for <span className="font-serif-display italic text-emerald-200/90">long-term</span> value.
+            </h2>
+            <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
+              We are a software engineering partner focused on the realities of your operations, your teams, and your future growth.
+            </p>
+            <LinkButton href="/about" variant="secondary" className="mt-8" icon={<ArrowUpRight size={15} />}>
+              About us
+            </LinkButton>
+          </div>
+          <ul className="relative grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+            {companyValues.map((value, i) => (
+              <motion.li
+                key={value}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                className="group flex items-center gap-4 border-b border-white/6 py-5"
+              >
+                <span className="font-mono text-[0.7rem] tracking-[0.18em] text-emerald-300/70">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="text-sm font-medium text-slate-200 transition group-hover:text-white">{value}</span>
+                <ArrowUpRight size={14} className="ml-auto text-slate-600 transition group-hover:text-emerald-300" />
+              </motion.li>
+            ))}
+          </ul>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- Selected Work (large rows) ----- */
+
+function SelectedWork() {
+  return (
+    <section id="work" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+      <div className="pointer-events-none absolute -left-40 top-1/3 h-72 w-72 rounded-full bg-emerald-500/8 blur-[100px]" />
+      <Container className="relative">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <SectionIndex index="08" label="Work" />
+            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+              Selected <span className="font-serif-display italic text-emerald-200/90">demonstration</span> work.
+            </h2>
+            <p className="mt-5 max-w-xl text-base leading-7 text-slate-400">
+              We are building reusable case-study formats so real projects can be added easily and clearly as they become available.
+            </p>
+          </div>
+          <LinkButton href="/work" variant="secondary" icon={<ArrowUpRight size={15} />}>
+            See all work
+          </LinkButton>
+        </div>
+
+        <div className="mt-14">
+          {caseStudies.map((project, i) => (
+            <Link
+              key={project.slug}
+              to={`/work/${project.slug}`}
+              data-cursor="view"
+              data-cursor-label="View"
+              className="work-row group block"
+            >
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 sm:gap-10">
+                <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div>
+                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">{project.label}</div>
+                  <h3 className="work-title mt-2 text-2xl font-semibold tracking-tightest text-white sm:text-4xl">
+                    {project.title}
+                  </h3>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">{project.overview}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {project.technology.slice(0, 4).map((tech) => (
+                      <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-2.5 py-1 text-[0.7rem] text-slate-300">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="work-arrow grid h-12 w-12 place-items-center rounded-full border border-white/8 bg-white/3 text-slate-300 transition group-hover:border-emerald-400/40 group-hover:bg-emerald-500/8 group-hover:text-emerald-300">
+                  <ArrowUpRight size={18} />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- Insights preview ----- */
+
+function InsightsPreview() {
+  return (
+    <section className="relative overflow-hidden bg-ink-900 py-24 lg:py-32">
+      <div className="paper-grid pointer-events-none absolute inset-0 opacity-50" />
+      <Container className="relative">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <SectionIndex index="09" label="Insights" />
+            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+              Practical <span className="font-serif-display italic text-emerald-200/90">perspectives</span> on business technology.
+            </h2>
+          </div>
+          <LinkButton href="/insights" variant="secondary" icon={<ArrowUpRight size={15} />}>
+            All insights
+          </LinkButton>
+        </div>
+
+        <div className="mt-14 grid gap-5 md:grid-cols-3">
+          {blogPosts.map((post, i) => (
+            <motion.div
+              key={post.slug}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.55, delay: i * 0.07 }}
+            >
+              <Link
+                to={`/insights/${post.slug}`}
+                data-cursor="view"
+                data-cursor-label="Read"
+                className="card-lift group relative-sweep relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">{post.category}</span>
+                  <span className="font-mono text-[0.65rem] text-slate-500">{post.readTime}</span>
+                </div>
+                <h3 className="mt-5 text-lg font-semibold leading-snug text-white transition group-hover:text-emerald-200">{post.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-400">{post.excerpt}</p>
+                <div className="mt-auto flex items-center justify-between pt-6 text-xs text-slate-500">
+                  <span>{post.date}</span>
+                  <span className="flex items-center gap-1.5 text-emerald-300 transition group-hover:translate-x-1">
+                    Read <ArrowUpRight size={12} />
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ----- FAQ preview ----- */
+
+function FAQPreview() {
+  const [openIdx, setOpenIdx] = useState(0)
+  const previewFaqs = faqs.slice(0, 5)
+  return (
+    <section className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+      <div className="dotted-grid pointer-events-none absolute inset-0 opacity-30" />
+      <Container className="relative">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
+          <div>
+            <SectionIndex index="10" label="FAQ" />
+            <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+              Questions, <span className="font-serif-display italic text-emerald-200/90">answered.</span>
+            </h2>
+            <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
+              Common answers about software development, integration, automation, cloud deployment, maintenance, and project planning.
+            </p>
+            <LinkButton href="/faq" variant="secondary" className="mt-8" icon={<ArrowUpRight size={15} />}>
+              All questions
+            </LinkButton>
+          </div>
+          <div>
+            <ul className="border-t border-white/8">
+              {previewFaqs.map((faq, i) => {
+                const isOpen = openIdx === i
+                return (
+                  <li key={faq.question} className="border-b border-white/8">
+                    <button
+                      type="button"
+                      onClick={() => setOpenIdx(isOpen ? -1 : i)}
+                      data-cursor="hover"
+                      className="group flex w-full items-start justify-between gap-6 py-5 text-left"
+                    >
+                      <span className="text-base font-medium text-white sm:text-lg">{faq.question}</span>
+                      <span className={`mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/10 text-emerald-300 transition-all duration-500 ${isOpen ? 'rotate-180 border-emerald-400/40 bg-emerald-500/10' : 'group-hover:border-emerald-400/30'}`}>
+                        {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+                      </span>
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <p className="max-w-2xl pb-6 pr-12 text-sm leading-7 text-slate-300">{faq.answer}</p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        </div>
+      </Container>
+    </section>
+  )
+}
+
+/* ============================================================================
+ * Pages
+ * ========================================================================= */
+
+function AboutPage() {
+  usePageMeta(pageMeta.about)
+  return (
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="01 — About"
+        title={
+          <>
+            Engineering with <span className="font-serif-display italic text-emerald-200/90">intent.</span>
+          </>
+        }
+        subtitle="Synergy Brix is a software engineering partner for companies that need dependable digital systems, practical business logic, and scalable solutions."
+        description="We act as a collaborative technology partner focused on solving real business problems with clear engineering and disciplined execution."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 md:grid-cols-2">
+          <InfoPanel title="Our Mission" text="To help businesses build reliable technology that supports growth, improves efficiency, and makes operations more confident and predictable." />
+          <InfoPanel title="Our Vision" text="To be a trusted technology partner for organizations that need strong engineering, thoughtful architecture, and business-aligned digital transformation." />
+          <InfoPanel title="Our Approach" text="We take a practical, structured approach: understand the problem, design the right solution, and build technology that fits the way your business actually works." />
+          <InfoPanel title="Engineering Principles" text="We focus on maintainability, clarity, scalability, security, and communication so technology stays useful as the business changes." />
+        </div>
+        <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_1.4fr]">
+          <h3 className="text-3xl font-semibold tracking-tightest text-white sm:text-4xl">
+            Why <span className="font-serif-display italic text-emerald-200/90">we build.</span>
+          </h3>
+          <p className="text-base leading-8 text-slate-300 sm:text-lg">
+            We believe digital systems should create clarity, reduce friction, and unlock business opportunity. We build software that helps teams work smarter, serve customers better, and adapt with confidence.
+          </p>
+        </div>
+      </Container>
+    </div>
   )
 }
 
 function ServicesPage() {
   usePageMeta(pageMeta.services)
-  const showLegacyServicesRedesign = false
-
   return (
-    <PageShell title="Services" subtitle="Technology capabilities designed to solve real business challenges and support long-term growth." description="We help organizations modernize operations, build custom software, connect systems, and create practical digital tools that scale with the business.">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {services.map((service) => (
-          <ServiceCard key={service.slug} service={service} />
-        ))}
-      </div>
-      {showLegacyServicesRedesign && <>
-      <section className="services-hero relative overflow-hidden bg-slate-950 text-white">
-        <div className="mesh-bg absolute inset-0 opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_74%_38%,rgba(16,185,129,0.2),transparent_23%),radial-gradient(circle_at_10%_90%,rgba(15,118,110,0.14),transparent_28%)]" />
-        <Container className="relative grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_.9fr] lg:py-20">
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .6 }}>
-            <div className="section-tag inline-flex items-center gap-2 rounded-full border border-emerald-300/25 bg-white/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-emerald-100"><Sparkles size={13} /> Synergy Brix services</div>
-            <h1 className="mt-6 max-w-3xl text-4xl font-semibold leading-[1.03] tracking-[-.065em] sm:text-5xl lg:text-6xl">Technology that moves your business forward.</h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">Custom systems, connected workflows, and dependable software engineered around the way your business operates.</p>
-            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300"><span className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">Business-first engineering</span><span className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">Built to integrate</span></div>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, scale: .95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .7, delay: .1 }}><div /></motion.div>
-        </Container>
-      </section>
-
-      <section className="py-14 lg:py-18">
-        <Container>
-          <SectionHeading eyebrow="Service capabilities" title="Purpose-built systems, not generic software." description="Each engagement begins with the business need, then brings together the technology, workflow, and data layers needed to solve it." />
-          <div className="mt-10 grid gap-5 lg:grid-cols-12">
-            <ServiceCard service={services[0]} />
-            <div className="grid gap-5 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
-              <ServiceCard service={services[1]} />
-              <ServiceCard service={services[2]} />
-            </div>
-            {services.slice(3).map((service) => <ServiceCard key={service.slug} service={service} />)}
-          </div>
-        </Container>
-      </section>
-
-      <section className="border-y border-slate-200 bg-white py-14 lg:py-16">
-        <Container>
-          <SectionHeading eyebrow="A connected approach" title="From business friction to better flow." description="We create the technology layer that lets people, processes, and information work together with more clarity." />
-          <div />
-        </Container>
-      </section>
-
-      <section className="py-14 lg:py-16">
-        <Container>
-          <SectionHeading eyebrow="How we build" title="A deliberate path from complexity to capability." description="A clear delivery model keeps decisions grounded in the business, while making space for the technical details that matter." />
-          <div className="mt-10 grid gap-4 md:grid-cols-5">
-            {['Understand the business', 'Design the solution', 'Build the system', 'Integrate existing tools', 'Deploy and improve'].map((step, index) => (
-              <motion.div key={step} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .2 }} transition={{ duration: .4, delay: index * .08 }} className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:border-emerald-200 hover:shadow-md">
-                <div className="mb-8 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-950 text-sm font-semibold text-emerald-100">0{index + 1}</div>
-                <h3 className="text-lg font-semibold leading-6 text-slate-900">{step}</h3>
-                {index < 4 && <span className="absolute -right-3 top-9 z-10 hidden h-px w-6 bg-emerald-200 md:block" />}
-              </motion.div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      <CTASection title="Have a business problem worth solving?" description="Tell us what you need to improve, connect, or build. We’ll help shape a practical way forward." primaryLabel="Start a Project" secondaryLabel="Talk to Us" primaryHref="/contact" secondaryHref="/contact" />
-      </>}
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="02 — Services"
+        title={
+          <>
+            Technology that <span className="font-serif-display italic text-emerald-200/90">moves</span> your business forward.
+          </>
+        }
+        subtitle="Technology capabilities designed to solve real business challenges and support long-term growth."
+        description="We help organizations modernize operations, build custom software, connect systems, and create practical digital tools that scale with the business."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {services.map((service, i) => (
+            <ServiceCard key={service.slug} service={service} index={i} />
+          ))}
+        </div>
+      </Container>
+      <CTASection
+        title="Have a business problem worth solving?"
+        description="Tell us what you need to improve, connect, or build. We'll help shape a practical way forward."
+        primaryLabel="Start a Project"
+        secondaryLabel="Talk to Us"
+        primaryHref={GOOGLE_FORM_URL}
+        secondaryHref={GOOGLE_FORM_URL}
+      />
+    </div>
   )
 }
 
@@ -593,284 +1372,424 @@ function ServiceDetailPage() {
   if (!service) return <NotFoundPage />
 
   return (
-    <PageShell title={service.title} subtitle={service.short} description={service.solution} breadcrumbs={[{ label: 'Services', to: '/services' }, { label: service.title }]}>
-      <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h3 className="text-xl font-semibold text-slate-900">Problem</h3>
-          <p className="mt-3 text-slate-600">{service.problem}</p>
-
-          <h3 className="mt-8 text-xl font-semibold text-slate-900">Solution</h3>
-          <p className="mt-3 text-slate-600">{service.solution}</p>
-
-          <h3 className="mt-8 text-xl font-semibold text-slate-900">What we provide</h3>
-          <ul className="mt-4 space-y-2 text-slate-600">
-            {service.features.map((feature) => (
-              <li key={feature} className="flex items-start gap-3"><Check className="mt-1 text-emerald-700" size={16} /> {feature}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8">
-          <h3 className="text-xl font-semibold text-slate-900">Technology approach</h3>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {service.technology.map((tech) => (
-              <span key={tech} className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700">{tech}</span>
-            ))}
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow={`Service · ${slug}`}
+        title={service.title}
+        subtitle={service.short}
+        breadcrumbs={[{ label: 'Services', to: '/services' }, { label: service.title }]}
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <div className="glass-panel rounded-3xl p-8 lg:p-10">
+            <SectionColumn title="Business problem" body={service.problem} />
+            <SectionColumn title="Our solution" body={service.solution} />
+            <div>
+              <h3 className="text-lg font-semibold text-white">What we provide</h3>
+              <ul className="mt-4 space-y-2 text-slate-300">
+                {service.features.map((feature) => (
+                  <li key={feature} className="flex items-start gap-3 text-sm leading-6">
+                    <Check className="mt-1 text-emerald-300" size={14} /> {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="mt-8 rounded-2xl bg-emerald-900 p-6 text-white">
-            <h4 className="text-lg font-semibold">Ready to move forward?</h4>
-            <p className="mt-2 text-sm text-emerald-100">We can help shape the right technology approach for your goals.</p>
-            <LinkButton to={GOOGLE_FORM_URL} variant="secondary-light" className="mt-5">{service.cta}</LinkButton>
+          <div className="space-y-6">
+            <div className="glass-panel rounded-3xl p-8">
+              <h3 className="text-lg font-semibold text-white">Technology approach</h3>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {service.technology.map((tech) => (
+                  <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-3 py-1.5 text-sm text-slate-200">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="relative overflow-hidden rounded-3xl border border-emerald-400/20 bg-gradient-to-br from-emerald-500/15 via-emerald-500/8 to-transparent p-8">
+              <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-emerald-500/20 blur-3xl" />
+              <h4 className="text-xl font-semibold text-white">Ready to move forward?</h4>
+              <p className="mt-2 text-sm leading-6 text-emerald-100">We can help shape the right technology approach for your goals.</p>
+              <LinkButton href={GOOGLE_FORM_URL} variant="primary" external className="mt-6" icon={<ArrowRight size={15} className="arrow-shift" />}>
+                {service.cta}
+              </LinkButton>
+            </div>
           </div>
         </div>
-      </div>
-    </PageShell>
+      </Container>
+    </div>
   )
 }
 
 function SolutionsPage() {
   usePageMeta(pageMeta.solutions)
-
   return (
-    <PageShell title="Solutions" subtitle="Business-oriented systems designed to improve visibility, efficiency, and control." description="We build digital solutions around business outcomes—streamlining operations, connecting teams, and making the right information accessible.">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {solutions.map((solution) => (
-          <div key={solution.slug} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-slate-900">{solution.title}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-600">{solution.summary}</p>
-            <div className="mt-5 space-y-4">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Business problem</div>
-                <p className="mt-2 text-sm text-slate-600">{solution.problem}</p>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="03 — Solutions"
+        title={
+          <>Outcomes that <span className="font-serif-display italic text-emerald-200/90">compound.</span></>
+        }
+        subtitle="Business-oriented systems designed to improve visibility, efficiency, and control."
+        description="We build digital solutions around business outcomes — streamlining operations, connecting teams, and making the right information accessible."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {solutions.map((solution, i) => (
+            <motion.div
+              key={solution.slug}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: (i % 3) * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              data-cursor="hover"
+              className="card-lift group relative-sweep relative overflow-hidden rounded-3xl border border-white/8 bg-white/3 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Solution</span>
+                <ArrowUpRight size={16} className="text-slate-500 transition group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-emerald-300" />
               </div>
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">Potential solution</div>
-                <p className="mt-2 text-sm text-slate-600">{solution.approach}</p>
+              <h3 className="mt-5 text-xl font-semibold text-white">{solution.title}</h3>
+              <p className="mt-3 text-sm leading-7 text-slate-300">{solution.summary}</p>
+              <div className="mt-5 space-y-4">
+                <div>
+                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">Business problem</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">{solution.problem}</p>
+                </div>
+                <div>
+                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">Potential solution</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">{solution.approach}</p>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PageShell>
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </div>
   )
 }
 
 function IndustriesPage() {
   usePageMeta(pageMeta.industries)
-
   return (
-    <PageShell title="Industries" subtitle="Flexible technology support for businesses operating in complex environments." description="We design software and systems that reflect the realities of each industry, from operational workflows to customer interactions and reporting needs.">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {industries.map((industry) => (
-          <IndustryCard key={industry.title} industry={industry} />
-        ))}
-      </div>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="04 — Industries"
+        title={
+          <>Real environments, <span className="font-serif-display italic text-emerald-200/90">real systems.</span></>
+        }
+        subtitle="Flexible technology support for businesses operating in complex environments."
+        description="We design software and systems that reflect the realities of each industry, from operational workflows to customer interactions and reporting needs."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {industries.map((industry, i) => {
+            const Icon = INDUSTRY_ICONS[industry.title] || Compass
+            return (
+              <motion.div
+                key={industry.title}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: (i % 3) * 0.06 }}
+                data-cursor="hover"
+                className="card-lift group relative overflow-hidden rounded-3xl border border-white/8 bg-white/3 p-6"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="grid h-11 w-11 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-500/8 text-emerald-300 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-3">
+                    <Icon size={18} />
+                  </div>
+                  <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-slate-500">0{i + 1}</span>
+                </div>
+                <h3 className="mt-6 text-lg font-semibold text-white">{industry.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-400">{industry.summary}</p>
+              </motion.div>
+            )
+          })}
+        </div>
+      </Container>
+    </div>
   )
 }
 
 function WorkPage() {
   usePageMeta(pageMeta.work)
-
   return (
-    <PageShell title="Work" subtitle="Selected project concepts and reusable case-study structures." description="We present demonstration-ready work placeholders so real case studies can be added later with clear context and verified detail.">
-      <div className="grid gap-6 lg:grid-cols-2">
-        {caseStudies.map((item) => (
-          <CaseStudyCard key={item.slug} item={item} />
-        ))}
-      </div>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="05 — Work"
+        title={
+          <>Selected <span className="font-serif-display italic text-emerald-200/90">work.</span></>
+        }
+        subtitle="Selected project concepts and reusable case-study structures."
+        description="We present demonstration-ready work placeholders so real case studies can be added later with clear context and verified detail."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div>
+          {caseStudies.map((project, i) => (
+            <Link
+              key={project.slug}
+              to={`/work/${project.slug}`}
+              data-cursor="view"
+              data-cursor-label="View"
+              className="work-row group block"
+            >
+              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 sm:gap-10">
+                <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">
+                  {String(i + 1).padStart(2, '0')}
+                </div>
+                <div>
+                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">{project.label}</div>
+                  <h3 className="work-title mt-2 text-2xl font-semibold tracking-tightest text-white sm:text-4xl">
+                    {project.title}
+                  </h3>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">{project.overview}</p>
+                </div>
+                <div className="work-arrow grid h-12 w-12 place-items-center rounded-full border border-white/8 bg-white/3 text-slate-300 transition group-hover:border-emerald-400/40 group-hover:bg-emerald-500/8 group-hover:text-emerald-300">
+                  <ArrowUpRight size={18} />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Container>
+    </div>
   )
 }
 
 function CaseStudyPage() {
   const { slug } = useParams()
   const item = caseStudies.find((entry) => entry.slug === slug)
-
   usePageMeta({
     title: item ? `${item.title} | Synergy Brix` : 'Not Found | Synergy Brix',
     description: item ? item.overview : 'The page you requested does not exist or may have moved.',
     canonical: item ? `https://synergybrix.com/work/${item.slug}` : 'https://synergybrix.com/404',
   })
-
   if (!item) return <NotFoundPage />
 
   return (
-    <PageShell title={item.title} subtitle={item.label} description={item.overview} breadcrumbs={[{ label: 'Work', to: '/work' }, { label: item.title }]}>
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-          <SectionColumn title="Overview" body={item.overview} />
-          <SectionColumn title="Challenge" body={item.challenge} />
-          <SectionColumn title="Approach" body={item.approach} />
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow={item.label}
+        title={item.title}
+        subtitle={item.overview}
+        breadcrumbs={[{ label: 'Work', to: '/work' }, { label: item.title }]}
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="glass-panel rounded-3xl p-8">
+            <SectionColumn title="Overview" body={item.overview} />
+            <SectionColumn title="Challenge" body={item.challenge} />
+            <SectionColumn title="Approach" body={item.approach} />
+          </div>
+          <div className="glass-panel rounded-3xl p-8">
+            <SectionColumn title="Solution" body={item.solution} />
+            <SectionColumn title="Technology" body={item.technology.join(', ')} />
+            <SectionColumn title="Architecture" body={item.architecture} />
+            <SectionColumn title="Outcome" body={item.outcome} />
+          </div>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8">
-          <SectionColumn title="Solution" body={item.solution} />
-          <SectionColumn title="Technology" body={item.technology.join(', ')} />
-          <SectionColumn title="Architecture" body={item.architecture} />
-          <SectionColumn title="Outcome" body={item.outcome} />
-        </div>
-      </div>
-    </PageShell>
+      </Container>
+    </div>
   )
 }
 
 function ProcessPage() {
   usePageMeta(pageMeta.process)
-
   return (
-    <PageShell title="Process" subtitle="A clear, business-aligned development process." description="We follow a structured delivery model that keeps technical quality, communication, and business understanding aligned throughout the project lifecycle.">
-      <div className="grid gap-6 lg:grid-cols-2">
-        {processSteps.map((step) => (
-          <div key={step.number} className="rounded-3xl border border-slate-200 bg-white p-7 shadow-sm">
-            <div className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">{step.number}</div>
-            <h3 className="mt-3 text-2xl font-semibold text-slate-900">{step.title}</h3>
-            <p className="mt-3 text-slate-600">{step.description}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-10 rounded-3xl border border-emerald-200 bg-emerald-50 p-8">
-        <h3 className="text-2xl font-semibold text-slate-900">Discovery and planning are central to every project.</h3>
-        <p className="mt-4 max-w-3xl text-slate-700">We value clear requirements, realistic milestones, practical design decisions, and sustainable implementation choices that help your teams stay aligned from start to finish.</p>
-        <LinkButton to={GOOGLE_FORM_URL} variant="primary" className="mt-6">Start a Project</LinkButton>
-      </div>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="06 — Process"
+        title={
+          <>A clear, <span className="font-serif-display italic text-emerald-200/90">business-aligned</span> process.</>
+        }
+        subtitle="A clear, business-aligned development process."
+        description="We follow a structured delivery model that keeps technical quality, communication, and business understanding aligned throughout the project lifecycle."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 lg:grid-cols-2">
+          {[
+            { number: '01', title: 'Discover', description: 'Understand requirements and business objectives.' },
+            { number: '02', title: 'Plan', description: 'Define scope, architecture, technology, and milestones.' },
+            { number: '03', title: 'Design', description: 'Create user flows, interfaces, and system structure.' },
+            { number: '04', title: 'Develop', description: 'Build clean and maintainable software.' },
+            { number: '05', title: 'Test', description: 'Validate functionality, usability, security, and reliability.' },
+            { number: '06', title: 'Deploy', description: 'Launch the solution and provide ongoing support.' },
+          ].map((step, i) => (
+            <motion.div
+              key={step.number}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: (i % 2) * 0.06 }}
+              data-cursor="hover"
+              className="card-lift group relative flex items-start gap-5 rounded-2xl border border-white/8 bg-white/3 p-6"
+            >
+              <span className="font-mono text-[0.75rem] uppercase tracking-[0.18em] text-emerald-300/80">
+                {step.number}
+              </span>
+              <div>
+                <h3 className="text-xl font-semibold text-white">{step.title}</h3>
+                <p className="mt-2 text-sm leading-7 text-slate-400">{step.description}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </div>
   )
 }
 
 function TechnologiesPage() {
   usePageMeta(pageMeta.technologies)
-
+  const groups = [
+    { title: 'Frontend', items: ['React', 'TypeScript', 'HTML', 'CSS', 'JavaScript'] },
+    { title: 'Backend', items: ['Java', 'Spring Boot', 'REST APIs'] },
+    { title: 'Databases', items: ['PostgreSQL', 'MySQL'] },
+    { title: 'APIs', items: ['REST API Design', 'API Integration', 'System Connectivity'] },
+    { title: 'Security', items: ['Authentication', 'Authorization', 'JWT', 'Role-Based Access Control'] },
+    { title: 'Cloud', items: ['Docker', 'Cloud Deployment', 'CI/CD-ready architecture'] },
+    { title: 'DevOps', items: ['Version Control', 'Environment readiness', 'Deployment support', 'Monitoring preparation'] },
+  ]
   return (
-    <PageShell title="Technologies" subtitle="Choosing technology to fit the business, not the other way around." description="We choose technologies based on project requirements, scalability, maintainability, and business goals.">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {technologyGroups.map((group) => (
-          <div key={group.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-slate-900">{group.title}</h3>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {group.items.map((item) => (
-                <span key={item} className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-700">{item}</span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="07 — Technologies"
+        title={
+          <>Choosing tech to <span className="font-serif-display italic text-emerald-200/90">fit the business.</span></>
+        }
+        subtitle="Choosing technology to fit the business, not the other way around."
+        description="We choose technologies based on project requirements, scalability, maintainability, and business goals."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {groups.map((group, i) => (
+            <motion.div
+              key={group.title}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: (i % 3) * 0.05 }}
+              data-cursor="hover"
+              className="card-lift relative-sweep rounded-3xl border border-white/8 bg-white/3 p-6"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">{group.title}</h3>
+                <span className="font-mono text-[0.7rem] text-slate-500">0{i + 1}</span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {group.items.map((item) => (
+                  <span key={item} className="rounded-full border border-white/8 bg-white/3 px-3 py-1.5 text-sm text-slate-200">
+                    {item}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </Container>
+    </div>
   )
 }
 
-
-
-
 function InsightsPage() {
   usePageMeta(pageMeta.insights)
-
   return (
-    <PageShell title="Insights" subtitle="Ideas and practical perspectives on software, systems, and business technology." description="Explore short articles on software development, APIs, business automation, cloud planning, digital transformation, and better technology decisions.">
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {blogPosts.map((post) => (
-          <BlogCard key={post.slug} post={post} />
-        ))}
-      </div>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="08 — Insights"
+        title={
+          <>Practical <span className="font-serif-display italic text-emerald-200/90">perspectives.</span></>
+        }
+        subtitle="Ideas and practical perspectives on software, systems, and business technology."
+        description="Explore short articles on software development, APIs, business automation, cloud planning, digital transformation, and better technology decisions."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {blogPosts.map((post, i) => (
+            <BlogCard key={post.slug} post={post} index={i} />
+          ))}
+        </div>
+      </Container>
+    </div>
   )
 }
 
 function InsightDetailPage() {
   const { slug } = useParams()
   const post = blogPosts.find((item) => item.slug === slug)
-
   usePageMeta({
     title: post ? `${post.title} | Synergy Brix` : 'Page Not Found | Synergy Brix',
     description: post ? post.excerpt : 'The insight you are looking for could not be found.',
     canonical: post ? `https://synergybrix.com/insights/${post.slug}` : 'https://synergybrix.com/404',
   })
-
   if (!post) return <NotFoundPage />
-
   return (
-    <PageShell title={post.title} subtitle={`${post.category} • ${post.date} • ${post.readTime}`} description={post.excerpt} breadcrumbs={[{ label: 'Insights', to: '/insights' }, { label: post.title }]}>
-      <article className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">{post.category}</p>
-        <div className="mt-6 space-y-5 text-lg leading-8 text-slate-700">
-          {post.content.map((paragraph) => (
-            <p key={paragraph}>{paragraph}</p>
-          ))}
-        </div>
-      </article>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow={post.category}
+        title={post.title}
+        subtitle={`${post.date} · ${post.readTime}`}
+        breadcrumbs={[{ label: 'Insights', to: '/insights' }, { label: post.title }]}
+      />
+      <Container className="pb-24 lg:pb-32">
+        <article className="mx-auto max-w-3xl glass-panel rounded-3xl p-8 sm:p-12">
+          <p className="text-sm leading-8 text-slate-300 sm:text-lg sm:leading-9">
+            {post.content.map((paragraph) => (
+              <span key={paragraph} className="block">{paragraph}</span>
+            ))}
+          </p>
+        </article>
+      </Container>
+    </div>
   )
 }
 
 function ContactPage() {
   usePageMeta(pageMeta.contact)
-
   return (
-    <section className="relative overflow-hidden bg-slate-950 text-white">
+    <section className="surface-canvas relative overflow-hidden pt-32 pb-20 lg:pt-44 lg:pb-28">
       <div className="mesh-bg absolute inset-0" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,0.20),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.10),transparent_30%)]" />
-      <Container className="relative grid items-center gap-14 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 lg:py-28">
-        <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.1 } } }} className="relative">
-          <motion.div variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.45 }} className="section-tag inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-white/5 px-3 py-1.5 text-sm font-medium text-emerald-100 shadow-[0_0_0_1px_rgba(52,211,153,0.12)] backdrop-blur-sm">
-            <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            Let&apos;s start a project
+      <BgText className="top-20 left-1/2 -translate-x-1/2">Contact</BgText>
+      <div className="pointer-events-none absolute -left-32 top-20 h-80 w-80 rounded-full bg-emerald-500/15 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-32 bottom-0 h-72 w-72 rounded-full bg-teal-500/12 blur-[120px]" />
+      <Container className="relative grid items-center gap-14 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+        <motion.div initial="hidden" animate="show" variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }} className="relative">
+          <motion.div variants={fadeIn} className="eyebrow">
+            <span className="status-pulse" /> Let&apos;s start a project
           </motion.div>
-
-          <motion.h1 variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6 }} className="mt-6 max-w-2xl text-4xl font-semibold leading-[1.04] tracking-[-0.06em] text-white sm:text-5xl lg:text-6xl">
-            Let&apos;s Build Something <span className="bg-gradient-to-r from-emerald-200 via-emerald-300 to-teal-200 bg-clip-text text-transparent">That Matters.</span>
-          </motion.h1>
-
-          <motion.p variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.55 }} className="mt-6 max-w-xl text-lg leading-8 text-slate-300">
+          <h1 className="mt-6 max-w-2xl text-[clamp(2.4rem,5vw,4.5rem)] font-semibold leading-[1.0] tracking-tightest text-white">
+            <RevealText as="span" delay={0.05} className="block">Let&apos;s build</RevealText>
+            <RevealText as="span" delay={0.18} className="block">something that</RevealText>
+            <RevealText as="span" delay={0.32} className="font-serif-display italic text-emerald-200/90">matters.</RevealText>
+          </h1>
+          <motion.p variants={fadeIn} className="mt-6 max-w-xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">
             Tell us about your goals, challenge, or opportunity. Share a few details and we&apos;ll get back to you with the right next steps.
           </motion.p>
-
-          <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.55 }} className="mt-9 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <a
-              href={GOOGLE_FORM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative inline-flex items-center justify-center gap-3 overflow-hidden rounded-full bg-emerald-500 px-7 py-4 text-base font-semibold text-emerald-950 shadow-[0_18px_45px_rgba(16,185,129,0.32)] transition duration-300 hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-[0_22px_55px_rgba(16,185,129,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-200"
-            >
-              <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-              <span className="relative">Start a Project</span>
-              <ArrowRight size={18} className="relative transition-transform duration-300 group-hover:translate-x-1" />
-            </a>
-            <span className="text-sm text-slate-400">Opens our project enquiry form in a new tab</span>
+          <motion.div variants={fadeIn} className="mt-9 flex flex-col items-start gap-3 sm:flex-row sm:items-center">
+            <Magnetic>
+              <LinkButton href={GOOGLE_FORM_URL} variant="primary" external icon={<ArrowRight size={16} className="arrow-shift" />}>
+                Start a Project
+              </LinkButton>
+            </Magnetic>
+            <span className="text-sm text-slate-500">Opens our project enquiry form in a new tab</span>
           </motion.div>
-
-          <motion.div variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }} transition={{ duration: 0.6, delay: 0.1 }} className="mt-12 grid gap-4 sm:grid-cols-2">
-            <ContactInfoCard
-              icon={<Mail size={18} />}
-              label="Email"
-              value="hello@synergybrix.com"
-              href="mailto:hello@synergybrix.com"
-            />
-            <ContactInfoCard
-              icon={<MapPin size={18} />}
-              label="Location"
-              value="India • Remote-ready"
-            />
-            <ContactInfoCard
-              icon={<FaLinkedinIn size={16} />}
-              label="LinkedIn"
-              value="Connect on LinkedIn"
-              href="https://www.linkedin.com"
-            />
-            <ContactInfoCard
-              icon={<FaGithub size={16} />}
-              label="GitHub"
-              value="View on GitHub"
-              href="https://github.com"
-            />
+          <motion.div variants={fadeIn} className="mt-12 grid gap-3 sm:grid-cols-2">
+            <ContactInfoCard icon={<Mail size={16} />} label="Email" value="hello@synergybrix.com" href="mailto:hello@synergybrix.com" />
+            <ContactInfoCard icon={<MapPin size={16} />} label="Location" value="India • Remote-ready" />
+            <ContactInfoCard icon={<FaLinkedinIn size={14} />} label="LinkedIn" value="Connect on LinkedIn" href="https://www.linkedin.com" />
+            <ContactInfoCard icon={<FaGithub size={14} />} label="GitHub" value="View on GitHub" href="https://github.com" />
           </motion.div>
         </motion.div>
-
-        <motion.div initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.75, ease: 'easeOut' }} className="relative">
+        <motion.div initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="relative">
           <ContactNetwork />
         </motion.div>
       </Container>
     </section>
   )
 }
+
+const fadeIn = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.6 } } }
 
 function ContactInfoCard({ icon, label, value, href }: { icon: React.ReactNode; label: string; value: string; href?: string }) {
   const content = (
@@ -879,27 +1798,26 @@ function ContactInfoCard({ icon, label, value, href }: { icon: React.ReactNode; 
         {icon}
       </span>
       <span className="flex flex-col">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">{label}</span>
+        <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-200/80">{label}</span>
         <span className="text-sm font-medium text-white">{value}</span>
       </span>
     </>
   )
-
   if (href) {
     return (
       <a
         href={href}
         target={href.startsWith('http') ? '_blank' : undefined}
         rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
-        className="group flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition duration-300 hover:-translate-y-0.5 hover:border-emerald-300/30 hover:bg-white/[0.07] hover:shadow-[0_0_24px_rgba(16,185,129,0.18)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
+        data-cursor="hover"
+        className="card-lift group flex items-center gap-3 rounded-2xl border border-white/8 bg-white/3 p-4 transition duration-300 hover:border-emerald-300/30 hover:bg-white/5"
       >
         {content}
       </a>
     )
   }
-
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 transition duration-300">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/8 bg-white/3 p-4">
       {content}
     </div>
   )
@@ -934,11 +1852,11 @@ const contactNetworkParticles = [
 
 function ContactNetwork() {
   return (
-    <div className="contact-network" aria-label="Synergy Brix project connection network">
-      <div className="contact-network-grid" />
-      <div className="contact-network-aurora contact-network-aurora-one" />
-      <div className="contact-network-aurora contact-network-aurora-two" />
-      <svg className="contact-network-links" viewBox="0 0 500 460" role="img" aria-label="Connections between your goals and Synergy Brix capabilities">
+    <div className="architecture-visual" aria-label="Synergy Brix project connection network">
+      <div className="architecture-grid" />
+      <div className="architecture-aurora architecture-aurora-one" />
+      <div className="architecture-aurora architecture-aurora-two" />
+      <svg className="architecture-links" viewBox="0 0 500 460" role="img" aria-label="Connections between your goals and Synergy Brix capabilities">
         <defs>
           <linearGradient id="contact-network-line" x1="0" x2="1">
             <stop stopColor="#34d399" stopOpacity=".12" />
@@ -947,32 +1865,31 @@ function ContactNetwork() {
           </linearGradient>
         </defs>
         {contactNetworkPaths.map((path) => (
-          <path key={path} className="contact-network-link" d={path} />
+          <path key={path} className="architecture-link" d={path} />
         ))}
         {contactNetworkParticles.map((p, index) => (
-          <circle key={index} className={`contact-network-particle contact-particle-${index}`} cx={p.x} cy={p.y} r={3} />
+          <circle key={index} className={`architecture-particle contact-particle-${index}`} cx={p.x} cy={p.y} r={3} />
         ))}
       </svg>
-
-      <div className="contact-network-core">
-        <div className="contact-network-core-orbit" />
-        <div className="contact-network-core-inner">
+      <div className="architecture-core">
+        <div className="architecture-core-orbit" />
+        <div className="architecture-core-inner">
           <span className="text-[9px] font-semibold uppercase tracking-[0.22em] text-emerald-200/80">Connect with</span>
           <span className="mt-1 block text-base font-semibold tracking-[-0.04em] text-white">Synergy Brix</span>
           <span className="mt-2 flex items-center justify-center gap-1.5 text-[9px] uppercase tracking-[0.18em] text-emerald-300">
-            <i className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Project hub
+            <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Project hub
           </span>
         </div>
       </div>
-
       {contactNetworkNodes.map(({ label, icon: Icon, position }) => (
-        <div key={label} className={`contact-network-node ${position}`}>
-          <div className="contact-network-node-icon"><Icon size={15} strokeWidth={1.8} /></div>
+        <div key={label} className={`architecture-node ${position}`}>
+          <div className="architecture-node-icon">
+            <Icon size={15} strokeWidth={1.8} />
+          </div>
           <span>{label}</span>
         </div>
       ))}
-
-      <div className="contact-network-caption">
+      <div className="architecture-caption">
         <span className="status-pulse h-1.5 w-1.5 rounded-full bg-emerald-300" /> Discovery · Strategy · Build · Launch
       </div>
     </div>
@@ -981,113 +1898,91 @@ function ContactNetwork() {
 
 function FAQPage() {
   usePageMeta(pageMeta.faq)
-
+  const [openIdx, setOpenIdx] = useState(0)
   return (
-    <PageShell title="FAQ" subtitle="Questions companies often ask before starting a project." description="Common answers about software development, integration, automation, cloud deployment, maintenance, and project planning.">
-      <div className="space-y-4">
-        {faqs.map((faq, index) => (
-          <FAQAccordion key={faq.question} question={faq.question} answer={faq.answer} defaultOpen={index === 0} />
-        ))}
-      </div>
-    </PageShell>
+    <div className="bg-ink-950">
+      <PageHero
+        eyebrow="09 — FAQ"
+        title={
+          <>Questions, <span className="font-serif-display italic text-emerald-200/90">answered.</span></>
+        }
+        subtitle="Questions companies often ask before starting a project."
+        description="Common answers about software development, integration, automation, cloud deployment, maintenance, and project planning."
+      />
+      <Container className="pb-24 lg:pb-32">
+        <ul className="border-t border-white/8">
+          {faqs.map((faq, i) => {
+            const isOpen = openIdx === i
+            return (
+              <li key={faq.question} className="border-b border-white/8">
+                <button
+                  type="button"
+                  onClick={() => setOpenIdx(isOpen ? -1 : i)}
+                  data-cursor="hover"
+                  className="group flex w-full items-start justify-between gap-6 py-6 text-left"
+                >
+                  <span className="text-base font-medium text-white sm:text-lg">{faq.question}</span>
+                  <span className={`mt-1 grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/10 text-emerald-300 transition-all duration-500 ${isOpen ? 'rotate-180 border-emerald-400/40 bg-emerald-500/10' : 'group-hover:border-emerald-400/30'}`}>
+                    {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+                  </span>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <p className="max-w-3xl pb-6 pr-12 text-sm leading-7 text-slate-300">{faq.answer}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </li>
+            )
+          })}
+        </ul>
+      </Container>
+    </div>
   )
 }
 
-function LegalPage({ type }: { type: 'privacy' | 'terms' | 'cookies' }) {
+function LegalPage({ type }: { type: 'privacy' | 'terms' }) {
   const content = {
     privacy: {
       title: 'Privacy Policy',
-      description: 'This privacy policy is a placeholder for future legal review and should be customized to the final company operating model and jurisdiction.',
-      sections: [
-        'Synergy Brix respects the privacy of visitors and business contacts. This placeholder policy outlines the types of information that may be collected and how it may be used in the future.',
-        'Information may be collected through website forms, communication channels, or direct interactions where consent is provided. Such data may be used to respond to inquiries, discuss project opportunities, and manage ongoing communications.',
-        'This policy should be reviewed by legal counsel before publication and adapted to the final business practices, data processing activities, and privacy obligations applicable to the company.',
-      ],
+      description:
+        'This privacy policy is a placeholder for future legal review and should be customized to the final company operating model and jurisdiction.',
     },
     terms: {
       title: 'Terms & Conditions',
-      description: 'These terms and conditions are a placeholder for legal review and should be refined to reflect the actual service offering, scope of work, and commercial terms.',
-      sections: [
-        'This website is provided for informational purposes and does not constitute a contractual commitment. Final engagement terms, scope, and commercial arrangements are subject to separate written agreements.',
-        'Users of this website are responsible for ensuring that any information they submit is accurate and lawful. Synergy Brix may update website content at any time without prior notice.',
-        'These terms should be reviewed by legal counsel before being published or used as final commercial terms.',
-      ],
-    },
-    cookies: {
-      title: 'Cookie Policy',
-      description: 'This cookie policy is a placeholder and may be updated as analytics, consent tools, or third-party integrations are introduced.',
-      sections: [
-        'This website may use cookies or similar technologies to improve user experience, understand visitor interactions, and support performance monitoring.',
-        'Any use of analytics or tracking tools should be disclosed clearly and managed according to applicable privacy and consent requirements.',
-        'This policy should be reviewed by legal counsel before final publication and updated when the live website implementation is finalized.',
-      ],
+      description:
+        'These terms and conditions are a placeholder for legal review and should be refined to reflect the actual service offering, scope of work, and commercial terms.',
     },
   }[type]
 
   usePageMeta({
     title: `${content.title} | Synergy Brix`,
     description: content.description,
-    canonical: `https://synergybrix.com/${type === 'privacy' ? 'privacy' : type === 'terms' ? 'terms' : 'cookies'}`,
+    canonical: `https://synergybrix.com/${type === 'privacy' ? 'privacy' : 'terms'}`,
   })
 
   return (
-    <PageShell title={content.title} subtitle="Legal placeholder content for future review." description={content.description}>
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        {type === 'privacy' ? (
-          <div>
-            <p className="text-sm font-semibold">Last Updated: August 2026</p>
-            <p className="mt-4 text-base leading-8 text-slate-700">Synergy Brix respects your privacy. This Privacy Policy explains how we collect and use information provided through our website and project enquiry forms.</p>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Information We Collect</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">We may collect:</p>
-            <ul className="mt-2 list-disc pl-6 text-slate-700">
-              <li>Name</li>
-              <li>Company name</li>
-              <li>Email address</li>
-              <li>Phone number</li>
-              <li>Project requirements</li>
-              <li>Other information you voluntarily provide</li>
-            </ul>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">How We Use Your Information</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">We use this information to:</p>
-            <ul className="mt-2 list-disc pl-6 text-slate-700">
-              <li>Respond to enquiries</li>
-              <li>Understand project requirements</li>
-              <li>Provide quotations and services</li>
-              <li>Communicate with you</li>
-              <li>Improve our services</li>
-            </ul>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Google Forms</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">Project enquiries may be submitted through Google Forms. Information submitted through Google Forms may be processed and stored by Google according to Google's privacy policies.</p>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Information Sharing</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">We do not sell or rent your personal information. Information may be shared with service providers when necessary to operate our business or provide requested services, or when required by law.</p>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Data Security</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">We take reasonable measures to protect your information, but no online system can be guaranteed to be completely secure.</p>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Third-Party Links</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">Our website may contain links to third-party websites. We are not responsible for their privacy practices.</p>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Updates</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700">We may update this Privacy Policy when necessary. Changes will be posted on this page.</p>
-
-            <h3 className="mt-6 text-lg font-semibold text-slate-900">Contact</h3>
-            <p className="mt-3 text-base leading-8 text-slate-700"><strong>Synergy Brix</strong><br />Email: <strong>info@synergybrix</strong><br />Phone: <strong>+91 0000 00000</strong><br />Location: <strong>India</strong></p>
+    <div className="bg-ink-950">
+      <PageHero eyebrow="Legal" title={content.title} subtitle="Legal placeholder content for future review." description={content.description} />
+      <Container className="pb-24 lg:pb-32">
+        <div className="glass-panel mx-auto max-w-3xl rounded-3xl p-8 sm:p-12">
+          <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Last Updated: August 2026</div>
+          <p className="mt-4 text-base leading-8 text-slate-300 sm:text-lg">
+            This document is a placeholder and should be reviewed by legal counsel before publication.
+          </p>
+          <div className="mt-8 rounded-2xl border border-amber-400/25 bg-amber-400/8 p-4 text-sm text-amber-200">
+            Legal review required before final publication.
           </div>
-        ) : (
-          content.sections.map((section) => (
-            <p key={section} className="mt-4 text-base leading-8 text-slate-700 first:mt-0">{section}</p>
-          ))
-        )}
-
-        <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          Legal review required before final publication.
         </div>
-      </div>
-    </PageShell>
+      </Container>
+    </div>
   )
 }
 
@@ -1097,53 +1992,90 @@ function NotFoundPage() {
     description: 'The page you requested does not exist or may have moved.',
     canonical: 'https://synergybrix.com/404',
   })
-
   return (
-    <PageShell title="404" subtitle="This page could not be found." description="The page you requested does not exist or may have moved.">
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <h2 className="text-3xl font-semibold text-slate-900">Page not found</h2>
-        <p className="mt-4 text-slate-600">The requested page is not available. Please return to the homepage and continue exploring Synergy Brix.</p>
-        <LinkButton to="/" variant="primary" className="mt-6">Back to Home</LinkButton>
-      </div>
-    </PageShell>
-  )
-}
-
-function PageShell({ title, subtitle, description, breadcrumbs, children }: { title: string; subtitle?: string; description?: string; breadcrumbs?: { label: string; to?: string }[]; children: React.ReactNode }) {
-  return (
-    <div className="bg-slate-50 py-16">
-      <Container>
-        {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
-        <div className="mb-10 max-w-3xl">
-          <div className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">Synergy Brix</div>
-          <h1 className="mt-3 text-4xl font-semibold tracking-[-0.06em] text-slate-950 sm:text-5xl">{title}</h1>
-          {subtitle && <p className="mt-4 text-xl leading-8 text-slate-700">{subtitle}</p>}
-          {description && <p className="mt-4 text-base leading-8 text-slate-600">{description}</p>}
-        </div>
-        {children}
-      </Container>
+    <div className="bg-ink-950">
+      <section className="relative overflow-hidden pt-32 pb-24 lg:pt-44 lg:pb-32">
+        <div className="mesh-bg absolute inset-0" />
+        <BgText className="top-32 left-1/2 -translate-x-1/2">404</BgText>
+        <Container className="relative">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="eyebrow mx-auto w-fit">Lost in the build</div>
+            <h1 className="mt-6 text-5xl font-semibold tracking-tightest text-white sm:text-6xl">
+              This page is <span className="font-serif-display italic text-emerald-200/90">off-grid.</span>
+            </h1>
+            <p className="mt-5 text-base leading-7 text-slate-300 sm:text-lg">
+              The page you requested does not exist or may have moved. Return to the homepage and continue exploring.
+            </p>
+            <div className="mt-8 flex justify-center">
+              <Magnetic>
+                <LinkButton href="/" variant="primary" icon={<ArrowRight size={16} className="arrow-shift" />}>
+                  Back to Home
+                </LinkButton>
+              </Magnetic>
+            </div>
+          </div>
+        </Container>
+      </section>
     </div>
   )
 }
 
-function Breadcrumbs({ items }: { items: { label: string; to?: string }[] }) {
+/* ============================================================================
+ * Supporting components
+ * ========================================================================= */
+
+function PageHero({
+  eyebrow,
+  title,
+  subtitle,
+  description,
+  breadcrumbs,
+}: {
+  eyebrow: string
+  title: React.ReactNode
+  subtitle?: string
+  description?: string
+  breadcrumbs?: { label: string; to?: string }[]
+}) {
   return (
-    <nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 text-sm text-slate-600">
-      {items.map((item, index) => (
-        <div key={item.label} className="flex items-center gap-2">
-          {index > 0 && <span className="text-slate-400">/</span>}
-          {item.to ? <Link to={item.to} className="hover:text-emerald-900">{item.label}</Link> : <span>{item.label}</span>}
+    <section className="surface-canvas relative overflow-hidden pt-32 pb-14 lg:pt-44 lg:pb-20">
+      <div className="mesh-bg absolute inset-0" />
+      <div className="pointer-events-none absolute -right-32 top-20 h-72 w-72 rounded-full bg-emerald-500/12 blur-[120px]" />
+      <Container className="relative">
+        {breadcrumbs && (
+          <nav aria-label="Breadcrumb" className="mb-8 flex flex-wrap items-center gap-2 text-sm text-slate-400">
+            {breadcrumbs.map((item, index) => (
+              <div key={item.label} className="flex items-center gap-2">
+                {index > 0 && <span className="text-slate-600">/</span>}
+                {item.to ? (
+                  <Link to={item.to} className="hover:text-white">
+                    {item.label}
+                  </Link>
+                ) : (
+                  <span className="text-slate-300">{item.label}</span>
+                )}
+              </div>
+            ))}
+          </nav>
+        )}
+        <div className="max-w-4xl">
+          <div className="eyebrow">{eyebrow}</div>
+          <h1 className="mt-5 text-[clamp(2.4rem,5vw,4.5rem)] font-semibold leading-[1.0] tracking-tightest text-white">
+            {title}
+          </h1>
+          {subtitle && <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200 sm:text-xl">{subtitle}</p>}
+          {description && <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">{description}</p>}
         </div>
-      ))}
-    </nav>
+      </Container>
+    </section>
   )
 }
 
 function InfoPanel({ title, text }: { title: string; text: string }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h3 className="text-xl font-semibold text-slate-900">{title}</h3>
-      <p className="mt-3 text-base leading-8 text-slate-600">{text}</p>
+    <div data-cursor="hover" className="card-lift group rounded-3xl border border-white/8 bg-white/3 p-6">
+      <h3 className="text-lg font-semibold text-white">{title}</h3>
+      <p className="mt-3 text-sm leading-7 text-slate-300">{text}</p>
     </div>
   )
 }
@@ -1151,112 +2083,181 @@ function InfoPanel({ title, text }: { title: string; text: string }) {
 function SectionColumn({ title, body }: { title: string; body: string }) {
   return (
     <div className="mt-6 first:mt-0">
-      <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-      <p className="mt-3 text-base leading-8 text-slate-600">{body}</p>
+      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <p className="mt-2 text-sm leading-7 text-slate-300">{body}</p>
     </div>
   )
 }
 
-function CTASection({ title, description, primaryLabel, secondaryLabel, primaryHref, secondaryHref }: { title: string; description: string; primaryLabel: string; secondaryLabel: string; primaryHref: string; secondaryHref: string }) {
+function CTASection({
+  title,
+  description,
+  primaryLabel,
+  secondaryLabel,
+  primaryHref,
+  secondaryHref,
+}: {
+  title: string
+  description: string
+  primaryLabel: string
+  secondaryLabel: string
+  primaryHref: string
+  secondaryHref: string
+}) {
   return (
-    <section className="cta-grid relative overflow-hidden border-y border-emerald-700/50 bg-emerald-950 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_75%_20%,rgba(52,211,153,0.20),transparent_28%)]" />
-      <motion.div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" animate={{ x: [0, 40, 0], y: [0, 30, 0] }} transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }} />
-      <motion.div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-teal-400/15 blur-3xl" animate={{ x: [0, -30, 0], y: [0, -20, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />
-      <Container className="relative flex flex-col items-center justify-between gap-8 py-16 text-center lg:flex-row lg:text-left">
+    <section className="relative overflow-hidden border-t border-white/6 bg-ink-950 text-white">
+      <div className="cta-grid absolute inset-0 opacity-50" />
+      <BgText className="-top-12 left-1/2 -translate-x-1/2">Start</BgText>
+      <motion.div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-emerald-500/22 blur-[100px]" animate={{ x: [0, 40, 0], y: [0, 30, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />
+      <motion.div className="pointer-events-none absolute -right-16 bottom-0 h-72 w-72 rounded-full bg-teal-400/16 blur-[100px]" animate={{ x: [0, -30, 0], y: [0, -20, 0] }} transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }} />
+      <Container className="relative grid gap-10 py-20 lg:grid-cols-[1.4fr_1fr] lg:items-center lg:py-28">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-200">Let’s talk</p>
-          <h2 className="mt-3 text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">{title}</h2>
-          <p className="mt-3 max-w-xl text-lg text-emerald-100">{description}</p>
+          <div className="eyebrow">Let&apos;s talk</div>
+          <h2 className="mt-5 text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
+            {title}
+          </h2>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-slate-300">{description}</p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <LinkButton to={primaryHref} variant="primary-light">{primaryLabel}</LinkButton>
-          <LinkButton to={secondaryHref} variant="secondary-light">{secondaryLabel}</LinkButton>
+        <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">
+          <Magnetic>
+            <LinkButton href={primaryHref} variant="primary" external icon={<ArrowRight size={16} className="arrow-shift" />}>
+              {primaryLabel}
+            </LinkButton>
+          </Magnetic>
+          <Magnetic>
+            <LinkButton href={secondaryHref} variant="secondary" external>
+              {secondaryLabel}
+            </LinkButton>
+          </Magnetic>
         </div>
       </Container>
     </section>
   )
 }
 
-function ServiceCard({ service }: { service: (typeof services)[number] }) {
+function ServiceCard({ service, index = 0 }: { service: (typeof services)[number]; index?: number }) {
   return (
-    <motion.article initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.35 }} className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition-colors group-hover:bg-gradient-to-br group-hover:from-white group-hover:to-emerald-50/50">
-      <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-400/0 blur-2xl transition-colors duration-500 group-hover:bg-emerald-400/10" />
-      <div className="flex items-center justify-between gap-3">
-        <div className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-900 transition duration-300 group-hover:scale-110 group-hover:-rotate-6 group-hover:bg-emerald-100 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]"><Code2 size={18} /></div>
-        <span className="rounded-full border border-slate-200 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">Service</span>
-      </div>
-      <h3 className="mt-6 text-xl font-semibold text-slate-900">{service.title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{service.short}</p>
-      <p className="mt-3 text-xs leading-6 text-slate-500 opacity-0 transition-opacity duration-500 group-hover:opacity-100">{service.problem}</p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {service.technology.slice(0, 4).map((tech) => (
-          <span key={tech} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700">{tech}</span>
-        ))}
-      </div>
-      <Link to={`/services/${service.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Explore Service <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55, delay: (index % 3) * 0.06, ease: [0.16, 1, 0.3, 1] }}
+      data-cursor="hover"
+    >
+      <Link
+        to={`/services/${service.slug}`}
+        className="card-lift group relative-sweep relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/8 bg-white/3 p-6"
+      >
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Service · {String(index + 1).padStart(2, '0')}</span>
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">{service.technology[0]}</span>
+        </div>
+        <h3 className="mt-6 text-xl font-semibold tracking-tight text-white transition group-hover:text-emerald-200">{service.title}</h3>
+        <p className="mt-3 text-sm leading-7 text-slate-300">{service.short}</p>
+        <div className="mt-4 rounded-xl border border-white/6 bg-white/3 p-3">
+          <div className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-emerald-300/80">Problem</div>
+          <p className="mt-1 text-xs leading-6 text-slate-400">{service.problem}</p>
+        </div>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {service.technology.slice(0, 3).map((tech) => (
+            <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-2.5 py-1 text-[0.7rem] text-slate-300">
+              {tech}
+            </span>
+          ))}
+        </div>
+        <div className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-emerald-200">
+          Explore service
+          <span className="arrow-shift inline-flex">
+            <ArrowUpRight size={14} />
+          </span>
+        </div>
       </Link>
-    </motion.article>
+    </motion.div>
   )
 }
 
-function IndustryCard({ industry }: { industry: { title: string; summary: string } }) {
+function BlogCard({ post, index = 0 }: { post: (typeof blogPosts)[number]; index?: number }) {
   return (
-    <div className="group glass-card-hover relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-4 inline-flex rounded-xl bg-emerald-50 p-3 text-emerald-900 transition duration-300 group-hover:scale-110 group-hover:bg-emerald-100 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]"><Building2 size={18} /></div>
-      <h3 className="text-xl font-semibold text-slate-900">{industry.title}</h3>
-      <p className="mt-3 text-sm leading-7 text-slate-600">{industry.summary}</p>
-    </div>
-  )
-}
-
-function CaseStudyCard({ item }: { item: (typeof caseStudies)[number] }) {
-  return (
-    <article className="group glass-card-hover relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="mb-6 h-28 overflow-hidden rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#f8fafc_0%,#ecfdf5_55%,#d1fae5_100%)] p-4">
-        <div className="h-2 w-20 rounded-full bg-emerald-900/15 transition-transform duration-500 group-hover:scale-x-125 group-hover:origin-left" /><div className="mt-4 grid grid-cols-3 gap-2"><div className="h-12 rounded-md bg-white shadow-sm transition-transform duration-500 group-hover:-translate-y-1" /><div className="h-12 rounded-md bg-emerald-600/15 transition-transform duration-500 group-hover:-translate-y-1" /><div className="h-12 rounded-md bg-white shadow-sm transition-transform duration-500 group-hover:-translate-y-1" /></div>
-      </div>
-      <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{item.label}</div>
-      <h3 className="mt-3 text-2xl font-semibold text-slate-900">{item.title}</h3>
-      <p className="mt-3 text-slate-600">{item.overview}</p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {item.technology.map((tech) => (
-          <span key={tech} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-700">{tech}</span>
-        ))}
-      </div>
-      <Link to={`/work/${item.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        View case study <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.5, delay: (index % 3) * 0.06 }}
+    >
+      <Link
+        to={`/insights/${post.slug}`}
+        data-cursor="view"
+        data-cursor-label="Read"
+        className="card-lift group relative-sweep relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-6"
+      >
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">{post.category}</span>
+          <span className="font-mono text-[0.65rem] text-slate-500">{post.readTime}</span>
+        </div>
+        <h3 className="mt-5 text-lg font-semibold leading-snug text-white transition group-hover:text-emerald-200">{post.title}</h3>
+        <p className="mt-3 text-sm leading-7 text-slate-300">{post.excerpt}</p>
+        <div className="mt-auto flex items-center justify-between pt-6 text-xs text-slate-500">
+          <span>{post.date}</span>
+          <span className="flex items-center gap-1.5 text-emerald-300 transition group-hover:translate-x-1">
+            Read <ArrowUpRight size={12} />
+          </span>
+        </div>
       </Link>
-    </article>
+    </motion.div>
   )
 }
 
-function BlogCard({ post }: { post: (typeof blogPosts)[number] }) {
-  return (
-    <article className="group glass-card-hover relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{post.category}</div>
-      <h3 className="mt-3 text-xl font-semibold text-slate-900 transition-colors group-hover:text-emerald-700">{post.title}</h3>
-      <div className="mt-2 text-xs uppercase tracking-[0.14em] text-slate-500">{post.date} • {post.readTime}</div>
-      <p className="mt-4 text-sm leading-7 text-slate-600">{post.excerpt}</p>
-      <Link to={`/insights/${post.slug}`} className="group/link mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-900">
-        Read article <ArrowRight size={16} className="transition-transform duration-300 group-hover/link:translate-x-1" />
-      </Link>
-    </article>
+function LinkButton({
+  href,
+  children,
+  variant = 'primary',
+  className = '',
+  icon,
+  fullWidth = false,
+  external = false,
+}: {
+  href: string
+  children: React.ReactNode
+  variant?: 'primary' | 'secondary' | 'primary-light' | 'secondary-light' | 'outline-paper'
+  className?: string
+  icon?: React.ReactNode
+  fullWidth?: boolean
+  external?: boolean
+}) {
+  const variantClass = {
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    'primary-light': 'btn-primary-light',
+    'secondary-light': 'btn-secondary-light',
+    'outline-paper': 'btn-outline-paper',
+  }[variant]
+
+  const inner = (
+    <>
+      <span className="relative inline-flex items-center gap-2">
+        {children}
+        {icon}
+      </span>
+    </>
   )
-}
 
-function FAQAccordion({ question, answer, defaultOpen = false }: { question: string; answer: string; defaultOpen?: boolean }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen)
-
+  if (external || isExternalHref(href)) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-cursor="hover"
+        className={`btn-base ${variantClass} ${fullWidth ? 'w-full' : ''} ${className}`}
+      >
+        {inner}
+      </a>
+    )
+  }
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <button type="button" className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left" onClick={() => setIsOpen(!isOpen)}>
-        <span className="font-medium text-slate-900">{question}</span>
-        <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-700 transition ${isOpen ? 'rotate-180' : ''}`}><ChevronDown size={16} /></span>
-      </button>
-      {isOpen && <div className="border-t border-slate-200 px-5 py-4 text-slate-600">{answer}</div>}
-    </div>
+    <Link to={href} data-cursor="hover" className={`btn-base ${variantClass} ${fullWidth ? 'w-full' : ''} ${className}`}>
+      {inner}
+    </Link>
   )
 }
 
@@ -1264,81 +2265,24 @@ function isExternalHref(href: string) {
   return /^(https?:)?\/\//i.test(href) || href.startsWith('mailto:') || href.startsWith('tel:')
 }
 
-function LinkButton({ to, children, variant = 'primary', className = '', icon, fullWidth = false, onClick }: { to: string; children: React.ReactNode; variant?: 'primary' | 'secondary' | 'primary-light' | 'secondary-light'; className?: string; icon?: React.ReactNode; fullWidth?: boolean; onClick?: () => void }) {
-  const base = 'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-3 text-sm font-medium transition duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:shadow-md'
-  const styles = {
-    primary: 'bg-emerald-700 text-white shadow-[0_12px_30px_rgba(5,150,105,0.25)] hover:bg-emerald-600 hover:shadow-[0_16px_40px_rgba(5,150,105,0.4)]',
-    secondary: 'border border-slate-200 bg-white text-slate-900 hover:border-emerald-300 hover:text-emerald-900',
-    'primary-light': 'bg-white text-emerald-900 hover:bg-emerald-50',
-    'secondary-light': 'border border-white/25 bg-white/5 text-white hover:border-emerald-300/50 hover:bg-white/10',
-  }
-
-  const inner = (
-    <>
-      <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-      <span className="relative inline-flex items-center gap-2">
-        {children}
-        {icon && <span className="inline-flex transition-transform duration-300 group-hover:translate-x-1">{icon}</span>}
-      </span>
-    </>
-  )
-
-  if (isExternalHref(to)) {
-    return (
-      <a href={to} target="_blank" rel="noopener noreferrer" onClick={onClick} className={`${base} ${styles[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}>
-        {inner}
-      </a>
-    )
-  }
-
-  return (
-    <Link to={to} onClick={onClick} className={`${base} ${styles[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}>
-      {inner}
-    </Link>
-  )
-}
-
-function BrandLogo({ dark = false, className = '' }: { dark?: boolean; className?: string }) {
+function BrandLogo({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`flex h-10 w-10 items-center justify-center rounded-xl transition ${dark
-        ? 'bg-white p-1 shadow-sm ring-1 ring-white/20'
-        : 'bg-white p-1 shadow-sm ring-1 ring-slate-200/80'
-        } ${className}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1 shadow-sm ring-1 ring-white/15 transition ${className}`}
       aria-label="Synergy Brix logo"
     >
-      <img
-        src="/logo.png"
-        alt="Synergy Brix logo mark"
-        className="h-full w-full object-contain"
-      />
+      <img src="/logo.png" alt="Synergy Brix logo mark" className="h-full w-full object-contain" />
     </div>
   )
 }
 
 function Container({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
+  return <div className={`mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8 ${className}`}>{children}</div>
 }
 
-function Section({ children, background = 'white', id }: { children: React.ReactNode; background?: 'white' | 'soft'; id?: string }) {
-  return <section id={id} className={background === 'soft' ? 'bg-slate-50 py-20' : 'bg-white py-20'}>{children}</section>
-}
-
-function SectionHeading({ eyebrow, title, description }: { eyebrow: string; title: string; description: string }) {
-  return (
-    <div className="max-w-3xl">
-      <div className="section-tag inline-flex rounded-full border border-emerald-200/80 bg-emerald-50 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">{eyebrow}</div>
-      <h2 className="mt-4 text-3xl font-semibold tracking-[-0.05em] text-slate-950 sm:text-4xl">{title}</h2>
-      <p className="mt-4 text-base leading-8 text-slate-600 md:text-lg">{description}</p>
-    </div>
-  )
-}
-
-export default App
-
-/* ----------------------------------------------------------------------------
- * Global UI: Preloader, Mouse glow, scroll indicator, brand marks
- * -------------------------------------------------------------------------- */
+/* ============================================================================
+ * Global UI: Preloader, Scroll progress, hero orbs, scroll indicator
+ * ========================================================================= */
 
 function Preloader() {
   const [hidden, setHidden] = useState(() => sessionStorage.getItem('sb_preloaded') === '1')
@@ -1356,10 +2300,10 @@ function Preloader() {
     <AnimatePresence>
       {!hidden && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-ink-950"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          transition={{ duration: 0.55, ease: 'easeInOut' }}
           aria-hidden="true"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.18),transparent_60%)]" />
@@ -1371,7 +2315,14 @@ function Preloader() {
           >
             <div className="relative">
               <motion.div
-                animate={{ scale: [1, 1.06, 1], boxShadow: ['0 0 0px rgba(16,185,129,0)', '0 0 40px rgba(16,185,129,0.6)', '0 0 0px rgba(16,185,129,0)'] }}
+                animate={{
+                  scale: [1, 1.06, 1],
+                  boxShadow: [
+                    '0 0 0px rgba(16,185,129,0)',
+                    '0 0 40px rgba(16,185,129,0.6)',
+                    '0 0 0px rgba(16,185,129,0)',
+                  ],
+                }}
                 transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
                 className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2"
               >
@@ -1384,8 +2335,8 @@ function Preloader() {
                 transition={{ duration: 1.1, repeat: Infinity, ease: 'easeOut' }}
               />
             </div>
-            <span className="mt-5 text-sm font-medium tracking-[0.3em] text-emerald-200/80">SYNERGY BRIX</span>
-            <div className="mt-4 h-0.5 w-32 overflow-hidden rounded-full bg-white/10">
+            <span className="mt-5 font-mono text-sm font-medium tracking-[0.3em] text-emerald-200/80">SYNERGY BRIX</span>
+            <div className="mt-4 h-0.5 w-32 overflow-hidden rounded-full bg-white/8">
               <motion.div
                 className="h-full w-1/2 bg-emerald-400"
                 animate={{ x: ['-100%', '200%'] }}
@@ -1411,22 +2362,6 @@ function ScrollProgress() {
   )
 }
 
-function HeroOrbs() {
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, 120])
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -90])
-  const y3 = useTransform(scrollYProgress, [0, 1], [0, 60])
-
-  return (
-    <div ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-      <motion.div style={{ y: y1 }} className="animate-blob-1 absolute -left-24 top-24 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl" />
-      <motion.div style={{ y: y2 }} className="animate-blob-2 absolute right-0 top-40 h-80 w-80 rounded-full bg-teal-400/15 blur-3xl" />
-      <motion.div style={{ y: y3 }} className="animate-blob-1 absolute bottom-0 left-1/3 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-    </div>
-  )
-}
-
 function HeroBrandMark() {
   return (
     <motion.div
@@ -1449,21 +2384,21 @@ function HeroBrandMark() {
 
 function ScrollIndicator() {
   return (
-    <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2" aria-hidden="true">
+    <div className="pointer-events-none absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 lg:block" aria-hidden="true">
       <motion.a
         href="#services"
         onClick={(e) => {
           e.preventDefault()
           document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })
         }}
-        className="flex flex-col items-center gap-2 text-slate-400 transition-colors hover:text-emerald-300"
+        className="pointer-events-auto flex flex-col items-center gap-2 text-slate-500 transition-colors hover:text-emerald-300"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 0.6 }}
-        aria-label="Scroll to content"
+        transition={{ delay: 1.2, duration: 0.6 }}
+        aria-label="Scroll to services"
       >
-        <span className="text-[10px] font-medium uppercase tracking-[0.25em]">Scroll</span>
-        <span className="flex h-9 w-5 justify-center rounded-full border border-slate-600 p-1">
+        <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em]">Scroll</span>
+        <span className="flex h-9 w-5 justify-center rounded-full border border-white/15 p-1">
           <motion.span
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
@@ -1475,4 +2410,12 @@ function ScrollIndicator() {
   )
 }
 
+/* ============================================================================
+ * Hook helpers
+ * ========================================================================= */
 
+function useReducedMotionSafe() {
+  return useReducedMotion()
+}
+
+export default App
