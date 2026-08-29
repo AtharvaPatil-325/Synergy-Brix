@@ -1,6 +1,16 @@
 import { useEffect } from 'react'
 
-export function usePageMeta({ title, description, canonical }: { title: string; description: string; canonical: string }) {
+export function usePageMeta({
+  title,
+  description,
+  canonical,
+  robots = 'index, follow',
+}: {
+  title: string
+  description: string
+  canonical: string
+  robots?: string
+}) {
   useEffect(() => {
     document.title = title
 
@@ -43,5 +53,10 @@ export function usePageMeta({ title, description, canonical }: { title: string; 
     twitterCard.setAttribute('name', 'twitter:card')
     twitterCard.setAttribute('content', 'summary_large_image')
     if (!twitterCard.parentNode) document.head.appendChild(twitterCard)
-  }, [title, description, canonical])
+
+    const robotsTag = document.querySelector('meta[name="robots"]') ?? document.createElement('meta')
+    robotsTag.setAttribute('name', 'robots')
+    robotsTag.setAttribute('content', robots)
+    if (!robotsTag.parentNode) document.head.appendChild(robotsTag)
+  }, [title, description, canonical, robots])
 }

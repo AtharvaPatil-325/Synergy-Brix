@@ -1,3 +1,5 @@
+import { SITE_URL } from '../config/siteUrl'
+
 export type NavItem = {
   label: string
   to: string
@@ -344,67 +346,67 @@ export const pageMeta = {
   home: {
     title: 'Synergy Brix | Software Development & Technology Solutions',
     description: 'Synergy Brix builds software, web applications, APIs, automation systems, and digital solutions that help businesses operate smarter and grow with confidence.',
-    canonical: 'https://synergybrix.com/',
+    canonical: `${SITE_URL}/`,
   },
   about: {
     title: 'About Synergy Brix | Technology Partner for Modern Business',
     description: 'Learn about Synergy Brix and how we work as a technology partner focused on business-first engineering and practical digital transformation.',
-    canonical: 'https://synergybrix.com/about',
+    canonical: `${SITE_URL}/about`,
   },
   services: {
     title: 'Services | Synergy Brix',
     description: 'Discover Synergy Brix services including custom software, web apps, APIs, automation, dashboards, SaaS, cloud, and database solutions.',
-    canonical: 'https://synergybrix.com/services',
+    canonical: `${SITE_URL}/services`,
   },
   solutions: {
     title: 'Solutions | Synergy Brix',
     description: 'Explore business solutions from Synergy Brix for operations, CRM, inventory, customer portals, automation, reporting, and internal tools.',
-    canonical: 'https://synergybrix.com/solutions',
+    canonical: `${SITE_URL}/solutions`,
   },
   industries: {
     title: 'Industries | Synergy Brix',
     description: 'See how Synergy Brix supports manufacturing, engineering, healthcare, education, logistics, retail, services, real estate, and startups.',
-    canonical: 'https://synergybrix.com/industries',
+    canonical: `${SITE_URL}/industries`,
   },
   work: {
     title: 'Work | Synergy Brix',
     description: 'Browse selected project showcases and approach examples from Synergy Brix, including demonstration case studies and solution patterns.',
-    canonical: 'https://synergybrix.com/work',
+    canonical: `${SITE_URL}/work`,
   },
   process: {
     title: 'Process | Synergy Brix',
     description: 'Learn how Synergy Brix approaches discovery, planning, design, development, testing, deployment, and support for business software projects.',
-    canonical: 'https://synergybrix.com/process',
+    canonical: `${SITE_URL}/process`,
   },
   technologies: {
     title: 'Technologies | Synergy Brix',
     description: 'Review Synergy Brix technology capabilities across frontend, backend, databases, APIs, security, cloud, and DevOps.',
-    canonical: 'https://synergybrix.com/technologies',
+    canonical: `${SITE_URL}/technologies`,
   },
   insights: {
     title: 'Insights | Synergy Brix',
     description: 'Explore practical insights on business software, automation, architecture, integrations, digital transformation, and technology strategy.',
-    canonical: 'https://synergybrix.com/insights',
+    canonical: `${SITE_URL}/insights`,
   },
   contact: {
     title: 'Contact | Synergy Brix',
     description: 'Tell Synergy Brix about your software challenge, automation idea, or business technology initiative.',
-    canonical: 'https://synergybrix.com/contact',
+    canonical: `${SITE_URL}/contact`,
   },
   faq: {
     title: 'FAQ | Synergy Brix',
     description: 'Find answers about software development services, project process, integrations, cloud deployment, automation, and support.',
-    canonical: 'https://synergybrix.com/faq',
+    canonical: `${SITE_URL}/faq`,
   },
   privacy: {
     title: 'Privacy Policy | Synergy Brix',
     description: 'Read the Synergy Brix privacy policy placeholder and information requirements for future legal review.',
-    canonical: 'https://synergybrix.com/privacy',
+    canonical: `${SITE_URL}/privacy`,
   },
   terms: {
     title: 'Terms & Conditions | Synergy Brix',
     description: 'Read the Synergy Brix terms and conditions placeholder for legal review and future refinement.',
-    canonical: 'https://synergybrix.com/terms',
+    canonical: `${SITE_URL}/terms`,
   }
 }
 

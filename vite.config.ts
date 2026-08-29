@@ -1,7 +1,8 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { seoFilesPlugin } from './seo/vite-plugin-seo-files.ts'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
+  plugins: [react(), seoFilesPlugin()],
 })
