@@ -255,9 +255,8 @@ function Navbar() {
                     aria-haspopup="menu"
                     onClick={() => setIsServicesOpen((open) => !open)}
                     data-cursor="hover"
-                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${
-                      location.pathname.startsWith('/services') ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
-                    }`}
+                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${location.pathname.startsWith('/services') ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
+                      }`}
                     data-active={location.pathname.startsWith('/services') || undefined}
                   >
                     {item.label}
@@ -301,13 +300,12 @@ function Navbar() {
                   type="button"
                   onClick={() => goToSection(item.id)}
                   data-cursor="hover"
-                  className={`nav-underline text-[0.85rem] font-medium transition-colors ${
-                    location.pathname === '/' && activeSection === item.id
+                  className={`nav-underline text-[0.85rem] font-medium transition-colors ${location.pathname === '/' && activeSection === item.id
                       ? 'text-emerald-300'
                       : location.pathname.startsWith(item.to) && item.to !== '/'
-                      ? 'text-emerald-300'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
+                        ? 'text-emerald-300'
+                        : 'text-slate-300 hover:text-white'
+                    }`}
                   data-active={
                     (location.pathname === '/' && activeSection === item.id) ||
                     (item.to !== '/' && location.pathname.startsWith(item.to)) ||
@@ -418,7 +416,7 @@ function Navbar() {
                   Start a Project
                 </LinkButton>
                 <div className="mt-6 flex items-center gap-4 text-sm text-slate-400">
-                  <a href="mailto:hello@synergybrix.com" className="hover:text-white">hello@synergybrix.com</a>
+                  <a href="mailto:synergy.brix@gmail.com" className="hover:text-white">synergy.brix@gmail.com</a>
                 </div>
               </motion.div>
             </div>
@@ -470,7 +468,7 @@ function Footer() {
           <div>
             <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Connect</h3>
             <ul className="mt-5 space-y-3 text-sm text-slate-300">
-              <li className="flex items-center gap-2.5"><Mail size={15} className="text-emerald-300" /> hello@synergybrix.com</li>
+              <li className="flex items-center gap-2.5"><Mail size={15} className="text-emerald-300" /> synergy.brix@gmail.com</li>
               <li className="flex items-center gap-2.5"><Phone size={15} className="text-emerald-300" /> +91 00000 00000</li>
               <li className="flex items-center gap-2.5"><MapPin size={15} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
@@ -1776,7 +1774,7 @@ function ContactPage() {
             <span className="text-sm text-slate-500">Opens our project enquiry form in a new tab</span>
           </motion.div>
           <motion.div variants={fadeIn} className="mt-12 grid gap-3 sm:grid-cols-2">
-            <ContactInfoCard icon={<Mail size={16} />} label="Email" value="hello@synergybrix.com" href="mailto:hello@synergybrix.com" />
+            <ContactInfoCard icon={<Mail size={16} />} label="Email" value="synergy.brix@gmail.com" href="mailto:synergy.brix@gmail.com" />
             <ContactInfoCard icon={<MapPin size={16} />} label="Location" value="India • Remote-ready" />
             <ContactInfoCard icon={<FaLinkedinIn size={14} />} label="LinkedIn" value="Connect on LinkedIn" href="https://www.linkedin.com" />
             <ContactInfoCard icon={<FaGithub size={14} />} label="GitHub" value="View on GitHub" href="https://github.com" />
