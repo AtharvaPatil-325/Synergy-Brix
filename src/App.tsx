@@ -1120,9 +1120,7 @@ function AboutValuesSection() {
             <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
               We are a software engineering partner focused on the realities of your operations, your teams, and your future growth.
             </p>
-            <LinkButton href="/#about" variant="secondary" className="mt-8" icon={<ArrowUpRight size={15} />}>
-              About us
-            </LinkButton>
+            
           </div>
           <ul className="relative grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {companyValues.map((value, i) => (
@@ -2294,8 +2292,36 @@ function LinkButton({
       </a>
     )
   }
+
+  const isHashLink = href.startsWith('/#') || href.startsWith('#')
+  const sectionId = isHashLink ? href.replace(/^\/?#/, '') : null
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    if (!isHashLink || !sectionId) return
+    e.preventDefault()
+
+    if (window.location.pathname !== '/') {
+      window.location.assign(`/#${sectionId}`)
+      return
+    }
+
+    const target = document.getElementById(sectionId)
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      window.history.replaceState(null, '', `/#${sectionId}`)
+      return
+    }
+
+    window.location.assign(`/#${sectionId}`)
+  }
+
   return (
-    <Link to={href} data-cursor="hover" className={`btn-base ${variantClass} ${fullWidth ? 'w-full' : ''} ${className}`}>
+    <Link
+      to={href}
+      onClick={handleClick}
+      data-cursor="hover"
+      className={`btn-base ${variantClass} ${fullWidth ? 'w-full' : ''} ${className}`}
+    >
       {inner}
     </Link>
   )
