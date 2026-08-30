@@ -517,12 +517,43 @@ function Footer() {
 
 const HERO_PILLARS = ['Custom software', 'Automation', 'APIs', 'Cloud', 'Dashboards']
 
+function HomeJsonLd() {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${SITE_URL}/#organization`,
+        name: 'Synergy Brix',
+        url: SITE_URL,
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE_URL}/logo.png`,
+        },
+        description:
+          'Synergy Brix is a technology and software development company building custom web applications, software solutions, AI-powered tools, business automation, and scalable digital products.',
+        sameAs: ['https://www.linkedin.com', 'https://github.com'],
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${SITE_URL}/#website`,
+        name: 'Synergy Brix',
+        url: SITE_URL,
+        publisher: { '@id': `${SITE_URL}/#organization` },
+      },
+    ],
+  }
+
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+}
+
 function HomePage() {
   usePageMeta(pageMeta.home)
 
   return (
     <>
       <Hero />
+      <HomeJsonLd />
       <Marquee
         items={[
           'Custom Software',
@@ -692,13 +723,13 @@ function Hero() {
             </motion.div>
 
             <h1 className="mt-7 max-w-3xl text-[clamp(2.6rem,6vw,5.25rem)] font-semibold leading-[0.98] tracking-tightest text-white">
-              <RevealText as="span" delay={0.05} className="block">Building digital</RevealText>
-              <RevealText as="span" delay={0.18} className="block">systems that</RevealText>
+              <RevealText as="span" delay={0.05} className="block">Synergy Brix</RevealText>
               <span className="block">
-                <RevealText as="span" delay={0.32} className="text-emerald-200/90 font-serif-display italic">actually move</RevealText>
-                <RevealText as="span" delay={0.46} className="text-white"> your</RevealText>
+                <RevealText as="span" delay={0.18} className="text-white">Web, Software</RevealText>
               </span>
-              <RevealText as="span" delay={0.58} className="block">business forward.</RevealText>
+              <span className="block">
+                <RevealText as="span" delay={0.32} className="text-emerald-200/90 font-serif-display italic">&amp; AI Development</RevealText>
+              </span>
             </h1>
 
             <motion.p
@@ -706,6 +737,13 @@ function Hero() {
               className="mt-7 max-w-xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8"
             >
               Custom software, business automation, web applications, and digital systems — designed around the way your business actually works.
+            </motion.p>
+
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, delay: 0.1 } } }}
+              className="mt-4 max-w-xl text-sm leading-6 text-slate-400"
+            >
+              Synergy Brix is a technology and software development company specializing in custom web applications, software solutions, AI-powered tools, business automation, and scalable digital products.
             </motion.p>
 
             <motion.div
@@ -1304,7 +1342,7 @@ function AboutPage() {
             Engineering with <span className="font-serif-display italic text-emerald-200/90">intent.</span>
           </>
         }
-        subtitle="Synergy Brix is a software engineering partner for companies that need dependable digital systems, practical business logic, and scalable solutions."
+        subtitle="Synergy Brix is a technology, web development, and software development company building AI solutions and digital product engineering for modern businesses."
         description="We act as a collaborative technology partner focused on solving real business problems with clear engineering and disciplined execution."
       />
       <Container className="pb-24 lg:pb-32">
@@ -1319,7 +1357,7 @@ function AboutPage() {
             Why <span className="font-serif-display italic text-emerald-200/90">we build.</span>
           </h3>
           <p className="text-base leading-8 text-slate-300 sm:text-lg">
-            We believe digital systems should create clarity, reduce friction, and unlock business opportunity. We build software that helps teams work smarter, serve customers better, and adapt with confidence.
+            From web development and custom software development to AI solutions and digital product engineering, we believe technology should create clarity, reduce friction, and unlock business opportunity. We build software that helps teams work smarter, serve customers better, and adapt with confidence.
           </p>
         </div>
       </Container>

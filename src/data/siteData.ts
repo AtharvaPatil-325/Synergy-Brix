@@ -327,12 +327,12 @@ export const homeProblems = [
 
 export const footerLinks = {
   quickLinks: [
-    { label: 'Services', to: '/services' },
+    { label: 'Synergy Brix Services', to: '/services' },
     { label: 'Solutions', to: '/solutions' },
     { label: 'Industries', to: '/industries' },
     { label: 'Work', to: '/work' },
-    { label: 'About', to: '/about' },
-    { label: 'Contact', to: '/contact' },
+    { label: 'About Synergy Brix', to: '/about' },
+    { label: 'Contact Synergy Brix', to: '/contact' },
    // { label: 'Privacy Policy', to: '/privacy' },
     // { label: 'Terms & Conditions', to: '/terms' },
   ],
@@ -345,7 +345,7 @@ export const footerLinks = {
 export const pageMeta = {
   home: {
     title: 'Synergy Brix | Software Development & Technology Solutions',
-    description: 'Synergy Brix builds software, web applications, APIs, automation systems, and digital solutions that help businesses operate smarter and grow with confidence.',
+    description: 'Synergy Brix is a technology and software development company building custom web applications, software solutions, AI-powered tools, business automation, and scalable digital products.',
     canonical: `${SITE_URL}/`,
   },
   about: {
