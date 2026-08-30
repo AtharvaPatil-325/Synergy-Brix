@@ -54,10 +54,10 @@ export type BlogPost = {
 }
 
 export const navItems: NavItem[] = [
-  { label: 'Home', to: '/' },
+  { label: 'Home', to: '/#home' },
   {
     label: 'Services',
-    to: '/services',
+    to: '/#services',
     children: [
       { label: 'Custom Software Development', to: '/services/custom-software-development' },
       { label: 'Web Application Development', to: '/services/web-development' },
@@ -70,7 +70,7 @@ export const navItems: NavItem[] = [
   },
   { label: 'Solutions', to: '/solutions' },
   { label: 'Work', to: '/work' },
-  { label: 'About', to: '/about' },
+  { label: 'About', to: '/#about' },
 ]
 
 export const services: Service[] = [
@@ -327,12 +327,12 @@ export const homeProblems = [
 
 export const footerLinks = {
   quickLinks: [
-    { label: 'Synergy Brix Services', to: '/services' },
+    { label: 'Synergy Brix Services', to: '/#services' },
     { label: 'Solutions', to: '/solutions' },
     { label: 'Industries', to: '/industries' },
-    { label: 'Work', to: '/work' },
-    { label: 'About Synergy Brix', to: '/about' },
-    { label: 'Contact Synergy Brix', to: '/contact' },
+    { label: 'Projects', to: '/#projects' },
+    { label: 'About Synergy Brix', to: '/#about' },
+    { label: 'Contact Synergy Brix', to: '/#contact' },
    // { label: 'Privacy Policy', to: '/privacy' },
     // { label: 'Terms & Conditions', to: '/terms' },
   ],
