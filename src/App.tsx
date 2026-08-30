@@ -59,11 +59,12 @@ const GOOGLE_FORM_URL =
   'https://docs.google.com/forms/d/e/1FAIpQLSfULk7ZMRSZ9krewdbd1elEYa8jLu0qmj3051MAKiYAqxCHcw/viewform?usp=header'
 
 const ALL_NAV = [
-  { label: 'Home', id: 'home', to: '/' },
-  { label: 'Services', id: 'services', to: '/services' },
+  { label: 'Home', id: 'home', to: '/#home' },
+  { label: 'Services', id: 'services', to: '/#services' },
   { label: 'Solutions', id: 'solutions', to: '/solutions' },
-  { label: 'Work', id: 'work', to: '/work' },
-  { label: 'About', id: 'about', to: '/about' },
+  { label: 'Projects', id: 'projects', to: '/#projects' },
+  { label: 'About', id: 'about', to: '/#about' },
+  { label: 'Contact', id: 'contact', to: '/#contact' },
 ]
 
 /* ============================================================================
@@ -234,7 +235,7 @@ function Navbar() {
           className="relative flex items-center justify-between rounded-full border px-5 sm:px-7"
           style={{ pointerEvents: 'auto' }}
         >
-          <Link to="/" data-cursor="hover" aria-label="Synergy Brix home" className="group flex items-center gap-2.5">
+          <Link to="/#home" data-cursor="hover" aria-label="Synergy Brix home" className="group flex items-center gap-2.5">
             <BrandLogo />
             <div className="leading-none">
               <div className="text-[0.95rem] font-semibold tracking-tight text-white">Synergy Brix</div>
@@ -256,9 +257,9 @@ function Navbar() {
                     onClick={() => setIsServicesOpen((open) => !open)}
                     data-cursor="hover"
                     className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${
-                      location.pathname.startsWith('/services') ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
+                      location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
                     }`}
-                    data-active={location.pathname.startsWith('/services') || undefined}
+                    data-active={(location.pathname === '/' && activeSection === item.id) || undefined}
                   >
                     {item.label}
                     <ChevronDown size={13} className={`transition-transform duration-300 ${isServicesOpen ? 'rotate-180' : ''}`} />
@@ -272,7 +273,7 @@ function Navbar() {
                       role="menu"
                     >
                       <Link
-                        to="/services"
+                        to="/#services"
                         onClick={() => setIsServicesOpen(false)}
                         className="mb-1 flex items-center justify-between rounded-xl border border-emerald-400/20 bg-emerald-500/8 px-3 py-2.5 text-sm font-semibold text-emerald-200 transition hover:bg-emerald-500/14"
                         role="menuitem"
@@ -442,7 +443,7 @@ function Footer() {
       <Container className="relative">
         <div className="grid gap-14 pb-16 lg:grid-cols-[1.3fr_1fr_1.3fr]">
           <div>
-            <Link to="/" className="group inline-flex items-center gap-3">
+            <Link to="/#home" className="group inline-flex items-center gap-3">
               <BrandLogo />
               <div className="leading-none">
                 <div className="text-[1.05rem] font-semibold tracking-tight text-white">Synergy Brix</div>
@@ -756,7 +757,7 @@ function Hero() {
                 </LinkButton>
               </Magnetic>
               <Magnetic>
-                <LinkButton href="/services" variant="secondary">
+                <LinkButton href="/#services" variant="secondary">
                   Explore Our Services
                 </LinkButton>
               </Magnetic>
@@ -838,7 +839,7 @@ function ServicesSpotlight() {
               Focused software capabilities for businesses that need reliable, scalable, and well-engineered digital systems.
             </p>
           </div>
-          <LinkButton href="/services" variant="secondary" icon={<ArrowUpRight size={15} />}>
+          <LinkButton href="/#services" variant="secondary" icon={<ArrowUpRight size={15} />}>
             All services
           </LinkButton>
         </div>
@@ -1120,7 +1121,7 @@ function AboutValuesSection() {
             <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
               We are a software engineering partner focused on the realities of your operations, your teams, and your future growth.
             </p>
-            <LinkButton href="/about" variant="secondary" className="mt-8" icon={<ArrowUpRight size={15} />}>
+            <LinkButton href="/#about" variant="secondary" className="mt-8" icon={<ArrowUpRight size={15} />}>
               About us
             </LinkButton>
           </div>
@@ -1152,7 +1153,7 @@ function AboutValuesSection() {
 
 function SelectedWork() {
   return (
-    <section id="work" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
+    <section id="projects" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
       <div className="pointer-events-none absolute -left-40 top-1/3 h-72 w-72 rounded-full bg-emerald-500/8 blur-[100px]" />
       <Container className="relative">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
@@ -1165,7 +1166,7 @@ function SelectedWork() {
               We are building reusable case-study formats so real projects can be added easily and clearly as they become available.
             </p>
           </div>
-          <LinkButton href="/work" variant="secondary" icon={<ArrowUpRight size={15} />}>
+          <LinkButton href="/#projects" variant="secondary" icon={<ArrowUpRight size={15} />}>
             See all work
           </LinkButton>
         </div>
@@ -1416,7 +1417,7 @@ function ServiceDetailPage() {
         eyebrow={`Service · ${slug}`}
         title={service.title}
         subtitle={service.short}
-        breadcrumbs={[{ label: 'Services', to: '/services' }, { label: service.title }]}
+        breadcrumbs={[{ label: 'Services', to: '/#services' }, { label: service.title }]}
       />
       <Container className="pb-24 lg:pb-32">
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
@@ -2048,7 +2049,7 @@ function NotFoundPage() {
             </p>
             <div className="mt-8 flex justify-center">
               <Magnetic>
-                <LinkButton href="/" variant="primary" icon={<ArrowRight size={16} className="arrow-shift" />}>
+                <LinkButton href="/#home" variant="primary" icon={<ArrowRight size={16} className="arrow-shift" />}>
                   Back to Home
                 </LinkButton>
               </Magnetic>
@@ -2145,7 +2146,7 @@ function CTASection({
   secondaryHref: string
 }) {
   return (
-    <section className="relative overflow-hidden border-t border-white/6 bg-ink-950 text-white">
+    <section id="contact" className="relative overflow-hidden border-t border-white/6 bg-ink-950 text-white">
       <div className="cta-grid absolute inset-0 opacity-50" />
       <BgText className="-top-12 left-1/2 -translate-x-1/2">Start</BgText>
       <motion.div className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-emerald-500/22 blur-[100px]" animate={{ x: [0, 40, 0], y: [0, 30, 0] }} transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }} />

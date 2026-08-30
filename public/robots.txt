@@ -3,4 +3,4 @@ Allow: /
 
 Disallow: /404
 
-Sitemap: https://synergybrix.com/sitemap.xml
+Sitemap: https://www.synergybrix.com/sitemap.xml

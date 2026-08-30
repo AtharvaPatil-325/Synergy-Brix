@@ -14,10 +14,7 @@ export type SitemapEntry = {
  */
 const staticEntries: SitemapEntry[] = [
   { path: '/', changeFrequency: 'weekly', priority: 1 },
-  { path: '/services', changeFrequency: 'weekly', priority: 0.9 },
   { path: '/solutions', changeFrequency: 'weekly', priority: 0.9 },
-  { path: '/contact', changeFrequency: 'weekly', priority: 0.9 },
-  { path: '/about', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/work', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/industries', changeFrequency: 'monthly', priority: 0.8 },
   { path: '/process', changeFrequency: 'monthly', priority: 0.8 },

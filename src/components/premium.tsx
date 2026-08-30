@@ -252,7 +252,7 @@ export function FloatingContactButton() {
           className="fixed bottom-5 right-5 z-50 sm:bottom-6 sm:right-6"
         >
           <Link
-            to="/contact"
+            to="/#contact"
             data-cursor="hover"
             aria-label="Start a project with Synergy Brix"
             className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-emerald-950 shadow-[0_14px_34px_rgba(5,150,105,0.4)] transition hover:-translate-y-0.5 hover:bg-emerald-400 hover:shadow-[0_18px_42px_rgba(5,150,105,0.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-300"
