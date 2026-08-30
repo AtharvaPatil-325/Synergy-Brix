@@ -1,5 +1,5 @@
-/** Canonical production origin. Never use localhost, www, or preview hosts. */
-export const SITE_URL = 'https://synergybrix.com'
+/** Canonical production origin (www). Never use localhost or preview hosts. */
+export const SITE_URL = 'https://www.synergybrix.com'
 
 const PREVIEW_OR_LOCAL = /localhost|127\.0\.0\.1|\.vercel\.app|^www\.synergybrix\.com$/i
 
