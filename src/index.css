@@ -883,6 +883,52 @@ img {
   box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
 }
 
+.process-card {
+  position: relative;
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 290px;
+  padding: 1.4rem 1rem 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(16, 22, 31, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 40px -28px rgba(0, 0, 0, 0.8);
+  text-align: center;
+  transition: border-color 0.35s ease, transform 0.5s var(--ease-out-expo), box-shadow 0.4s ease;
+}
+.process-card[data-active="true"] {
+  border-color: rgba(110, 231, 183, 0.38);
+  background: rgba(17, 24, 39, 0.82);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 22px 50px -28px rgba(16, 185, 129, 0.25);
+}
+.process-card__number {
+  margin-top: 1.5rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(167, 243, 208, 0.95);
+}
+.process-card__title {
+  margin-top: 0.8rem;
+  font-size: clamp(1.05rem, 1vw + 0.45rem, 1.35rem);
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #F8FAFC;
+}
+.process-card__text {
+  margin-top: 0.8rem;
+  max-width: 15.5rem;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(226, 232, 240, 0.84);
+}
+
 .timeline-node {
   position: relative;
   z-index: 1;
@@ -891,16 +937,32 @@ img {
   width: 70px;
   height: 70px;
   border-radius: 16px;
-  background: var(--ink-900);
-  color: var(--text-3);
-  border: 1px solid var(--line-strong);
+  background: rgba(15, 23, 42, 0.9);
+  color: rgba(148, 163, 184, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   transition: all 0.6s var(--ease-out-quart);
 }
 .timeline-node[data-active="true"] {
   color: #052E22;
-  background: var(--accent);
-  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+  border-color: rgba(52, 211, 153, 0.9);
   box-shadow: 0 12px 30px -8px rgba(52, 211, 153, 0.5);
+}
+
+@media (min-width: 1024px) {
+  .process-card {
+    min-height: 320px;
+    padding: 1.5rem 1rem 1.7rem;
+  }
+  .process-card__text {
+    max-width: 15rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .process-card__text {
+    max-width: 100%;
+  }
 }
 
 /* ============================================================================

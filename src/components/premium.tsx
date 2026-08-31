@@ -345,7 +345,7 @@ export function HowWeWork() {
                 animate={{ width: `${fillPercent}%` }}
                 transition={reduce ? { duration: 0 } : { duration: 0.6, ease: 'easeOut' }}
               />
-              <div className="relative grid grid-cols-5 gap-4">
+              <div className="relative grid gap-4 lg:grid-cols-5 lg:items-stretch">
                 {howWeWork.map((step, i) => {
                   const isActive = i <= active
                   return (
@@ -355,17 +355,16 @@ export function HowWeWork() {
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true, amount: 0.3 }}
                       transition={{ duration: 0.5, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                      className="flex flex-col items-center text-center"
+                      className="flex"
                     >
-                      <div
-                        className="timeline-node"
-                        data-active={isActive}
-                      >
-                        <step.Icon size={24} />
+                      <div className="process-card w-full" data-active={isActive}>
+                        <div className="timeline-node" data-active={isActive}>
+                          <step.Icon size={24} />
+                        </div>
+                        <div className="process-card__number">{step.num}</div>
+                        <h3 className="process-card__title">{step.title}</h3>
+                        <p className="process-card__text">{step.text}</p>
                       </div>
-                      <div className="mt-6 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">{step.num}</div>
-                      <h3 className="mt-2 text-lg font-semibold text-white">{step.title}</h3>
-                      <p className="mt-2 px-2 text-sm leading-6 text-slate-400">{step.text}</p>
                     </motion.div>
                   )
                 })}
