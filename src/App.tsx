@@ -471,7 +471,6 @@ function Footer() {
             <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Connect</h3>
             <ul className="mt-5 space-y-3 text-sm text-slate-300">
               <li className="flex items-center gap-2.5"><Mail size={15} className="text-emerald-300" /> synergy.brix@gmail.com</li>
-              <li className="flex items-center gap-2.5"><Phone size={15} className="text-emerald-300" /> +91 00000 00000</li>
               <li className="flex items-center gap-2.5"><MapPin size={15} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
             <div className="mt-6 flex gap-3">
