@@ -9,7 +9,6 @@ import {
   Sparkles,
   Code2,
   Mail,
-  Phone,
   MapPin,
   Cloud,
   Database,
