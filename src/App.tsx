@@ -61,7 +61,6 @@ const ALL_NAV = [
   { label: 'Home', id: 'home', to: '/#home' },
   { label: 'Services', id: 'services', to: '/#services' },
   { label: 'Solutions', id: 'solutions', to: '/solutions' },
-  { label: 'Projects', id: 'projects', to: '/#projects' },
   { label: 'About', id: 'about', to: '/#about' },
   { label: 'Contact', id: 'contact', to: '/#contact' },
 ]
@@ -255,9 +254,8 @@ function Navbar() {
                     aria-haspopup="menu"
                     onClick={() => setIsServicesOpen((open) => !open)}
                     data-cursor="hover"
-                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${
-                      location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
-                    }`}
+                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
+                      }`}
                     data-active={(location.pathname === '/' && activeSection === item.id) || undefined}
                   >
                     {item.label}
@@ -302,10 +300,10 @@ function Navbar() {
                   onClick={() => goToSection(item.id)}
                   data-cursor="hover"
                   className={`nav-underline text-[0.85rem] font-medium transition-colors ${location.pathname === '/' && activeSection === item.id
+                    ? 'text-emerald-300'
+                    : location.pathname.startsWith(item.to) && item.to !== '/'
                       ? 'text-emerald-300'
-                      : location.pathname.startsWith(item.to) && item.to !== '/'
-                        ? 'text-emerald-300'
-                        : 'text-slate-300 hover:text-white'
+                      : 'text-slate-300 hover:text-white'
                     }`}
                   data-active={
                     (location.pathname === '/' && activeSection === item.id) ||
@@ -470,7 +468,7 @@ function Footer() {
             <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Connect</h3>
             <ul className="mt-5 space-y-3 text-sm text-slate-300">
               <li className="flex items-center gap-2.5"><Mail size={15} className="text-emerald-300" /> synergy.brix@gmail.com</li>
-              
+
               <li className="flex items-center gap-2.5"><MapPin size={15} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
             <div className="mt-6 flex gap-3">
@@ -574,8 +572,6 @@ function HomePage() {
       <HowWeWork />
       <TechnologyStack />
       <AboutValuesSection />
-      <SelectedWork />
-      <InsightsPreview />
       <FAQPreview />
       <CTASection
         title="Have an idea worth building?"
@@ -1119,7 +1115,7 @@ function AboutValuesSection() {
             <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
               We are a software engineering partner focused on the realities of your operations, your teams, and your future growth.
             </p>
-            
+
           </div>
           <ul className="relative grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {companyValues.map((value, i) => (
@@ -1145,121 +1141,6 @@ function AboutValuesSection() {
   )
 }
 
-/* ----- Selected Work (large rows) ----- */
-
-function SelectedWork() {
-  return (
-    <section id="projects" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
-      <div className="pointer-events-none absolute -left-40 top-1/3 h-72 w-72 rounded-full bg-emerald-500/8 blur-[100px]" />
-      <Container className="relative">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <SectionIndex index="08" label="Work" />
-            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
-              Selected <span className="font-serif-display italic text-emerald-200/90">demonstration</span> work.
-            </h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-slate-400">
-              We are building reusable case-study formats so real projects can be added easily and clearly as they become available.
-            </p>
-          </div>
-          <LinkButton href="/#projects" variant="secondary" icon={<ArrowUpRight size={15} />}>
-            See all work
-          </LinkButton>
-        </div>
-
-        <div className="mt-14">
-          {caseStudies.map((project, i) => (
-            <Link
-              key={project.slug}
-              to={`/work/${project.slug}`}
-              data-cursor="view"
-              data-cursor-label="View"
-              className="work-row group block"
-            >
-              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 sm:gap-10">
-                <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <div>
-                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">{project.label}</div>
-                  <h3 className="work-title mt-2 text-2xl font-semibold tracking-tightest text-white sm:text-4xl">
-                    {project.title}
-                  </h3>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">{project.overview}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {project.technology.slice(0, 4).map((tech) => (
-                      <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-2.5 py-1 text-[0.7rem] text-slate-300">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="work-arrow grid h-12 w-12 place-items-center rounded-full border border-white/8 bg-white/3 text-slate-300 transition group-hover:border-emerald-400/40 group-hover:bg-emerald-500/8 group-hover:text-emerald-300">
-                  <ArrowUpRight size={18} />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-/* ----- Insights preview ----- */
-
-function InsightsPreview() {
-  return (
-    <section className="relative overflow-hidden bg-ink-900 py-24 lg:py-32">
-      <div className="paper-grid pointer-events-none absolute inset-0 opacity-50" />
-      <Container className="relative">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <SectionIndex index="09" label="Insights" />
-            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
-              Practical <span className="font-serif-display italic text-emerald-200/90">perspectives</span> on business technology.
-            </h2>
-          </div>
-          <LinkButton href="/insights" variant="secondary" icon={<ArrowUpRight size={15} />}>
-            All insights
-          </LinkButton>
-        </div>
-
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {blogPosts.map((post, i) => (
-            <motion.div
-              key={post.slug}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.55, delay: i * 0.07 }}
-            >
-              <Link
-                to={`/insights/${post.slug}`}
-                data-cursor="view"
-                data-cursor-label="Read"
-                className="card-lift group relative-sweep relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-6"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">{post.category}</span>
-                  <span className="font-mono text-[0.65rem] text-slate-500">{post.readTime}</span>
-                </div>
-                <h3 className="mt-5 text-lg font-semibold leading-snug text-white transition group-hover:text-emerald-200">{post.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-400">{post.excerpt}</p>
-                <div className="mt-auto flex items-center justify-between pt-6 text-xs text-slate-500">
-                  <span>{post.date}</span>
-                  <span className="flex items-center gap-1.5 text-emerald-300 transition group-hover:translate-x-1">
-                    Read <ArrowUpRight size={12} />
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
 
 /* ----- FAQ preview ----- */
 
@@ -1272,7 +1153,7 @@ function FAQPreview() {
       <Container className="relative">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
           <div>
-            <SectionIndex index="10" label="FAQ" />
+            <SectionIndex index="08" label="FAQ" />
             <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
               Questions, <span className="font-serif-display italic text-emerald-200/90">answered.</span>
             </h2>
