@@ -23,7 +23,7 @@ import {
   Minus,
   Building2,
 } from 'lucide-react'
-import { FaLinkedinIn, FaGithub } from 'react-icons/fa'
+import { FaLinkedinIn, FaInstagram } from 'react-icons/fa'
 import {
   blogPosts,
   caseStudies,
@@ -485,7 +485,7 @@ function Footer() {
                   {social.label.toLowerCase().includes('linkedin') ? (
                     <FaLinkedinIn size={16} className="transition-transform duration-300 group-hover:scale-110" />
                   ) : (
-                    <FaGithub size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                    <FaInstagram size={16} className="transition-transform duration-300 group-hover:scale-110" />
                   )}
                 </a>
               ))}
@@ -529,7 +529,7 @@ function HomeJsonLd() {
         },
         description:
           'Synergy Brix is a technology and software development company building custom web applications, software solutions, AI-powered tools, business automation, and scalable digital products.',
-        sameAs: ['https://www.linkedin.com', 'https://github.com'],
+        sameAs: ['https://www.linkedin.com', 'https://www.instagram.com/synergy.brix'],
       },
       {
         '@type': 'WebSite',
@@ -1695,7 +1695,7 @@ function ContactPage() {
             <ContactInfoCard icon={<Mail size={16} />} label="Email" value="synergy.brix@gmail.com" href="mailto:synergy.brix@gmail.com" />
             <ContactInfoCard icon={<MapPin size={16} />} label="Location" value="India • Remote-ready" />
             <ContactInfoCard icon={<FaLinkedinIn size={14} />} label="LinkedIn" value="Connect on LinkedIn" href="https://www.linkedin.com" />
-            <ContactInfoCard icon={<FaGithub size={14} />} label="GitHub" value="View on GitHub" href="https://github.com" />
+            <ContactInfoCard icon={<FaInstagram size={14} />} label="Instagram" value="Follow on Instagram" href="https://www.instagram.com/synergy.brix" />
           </motion.div>
         </motion.div>
         <motion.div initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="relative">

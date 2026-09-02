@@ -94,7 +94,7 @@ export const services: Service[] = [
     technology: ['React', 'TypeScript', 'HTML', 'CSS', 'REST APIs'],
     cta: 'Plan a web app',
   },
- 
+
   {
     slug: 'business-automation',
     title: 'Business Automation',
@@ -333,12 +333,12 @@ export const footerLinks = {
     { label: 'Projects', to: '/#projects' },
     { label: 'About Synergy Brix', to: '/#about' },
     { label: 'Contact Synergy Brix', to: '/#contact' },
-   // { label: 'Privacy Policy', to: '/privacy' },
+    // { label: 'Privacy Policy', to: '/privacy' },
     // { label: 'Terms & Conditions', to: '/terms' },
   ],
   social: [
-    { label: 'LinkedIn', href: 'https://www.linkedin.com' },
-    { label: 'GitHub', href: 'https://github.com' },
+    { label: 'LinkedIn', href: 'https://www.linkedin.com/in/synergy-brix-721726433/' },
+    { label: 'Instagram', href: 'https://www.instagram.com/synergy.brix' },
   ],
 }
 
