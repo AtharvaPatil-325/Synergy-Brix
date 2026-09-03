@@ -62,7 +62,7 @@ const ALL_NAV = [
   { label: 'Services', id: 'services', to: '/#services' },
   { label: 'Solutions', id: 'solutions', to: '/solutions' },
   { label: 'Projects', id: 'projects', to: '/#projects' },
-  { label: 'About', id: 'about', to: '/#about' },
+  { label: 'About', id: 'about', to: '/about' },
   { label: 'Contact', id: 'contact', to: '/#contact' },
 ]
 
@@ -574,8 +574,6 @@ function HomePage() {
       <HowWeWork />
       <TechnologyStack />
       <AboutValuesSection />
-      <SelectedWork />
-      <InsightsPreview />
       <FAQPreview />
       <CTASection
         title="Have an idea worth building?"
@@ -1117,9 +1115,13 @@ function AboutValuesSection() {
               Structured for <span className="font-serif-display italic text-emerald-200/90">long-term</span> value.
             </h2>
             <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
-              We are a software engineering partner focused on the realities of your operations, your teams, and your future growth.
+              SYNERGYBRIX helps growing businesses make technology simpler, smarter, and more accessible through practical digital solutions.
             </p>
-            
+            <div className="mt-7">
+              <LinkButton href="/about" variant="secondary" icon={<ArrowRight size={15} className="arrow-shift" />}>
+                More About Us
+              </LinkButton>
+            </div>
           </div>
           <ul className="relative grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {companyValues.map((value, i) => (
@@ -1145,122 +1147,6 @@ function AboutValuesSection() {
   )
 }
 
-/* ----- Selected Work (large rows) ----- */
-
-function SelectedWork() {
-  return (
-    <section id="projects" className="relative overflow-hidden bg-ink-950 py-24 lg:py-32">
-      <div className="pointer-events-none absolute -left-40 top-1/3 h-72 w-72 rounded-full bg-emerald-500/8 blur-[100px]" />
-      <Container className="relative">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <SectionIndex index="08" label="Work" />
-            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl lg:text-6xl">
-              Selected <span className="font-serif-display italic text-emerald-200/90">demonstration</span> work.
-            </h2>
-            <p className="mt-5 max-w-xl text-base leading-7 text-slate-400">
-              We are building reusable case-study formats so real projects can be added easily and clearly as they become available.
-            </p>
-          </div>
-          <LinkButton href="/#projects" variant="secondary" icon={<ArrowUpRight size={15} />}>
-            See all work
-          </LinkButton>
-        </div>
-
-        <div className="mt-14">
-          {caseStudies.map((project, i) => (
-            <Link
-              key={project.slug}
-              to={`/work/${project.slug}`}
-              data-cursor="view"
-              data-cursor-label="View"
-              className="work-row group block"
-            >
-              <div className="grid grid-cols-[auto_1fr_auto] items-center gap-6 sm:gap-10">
-                <div className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">
-                  {String(i + 1).padStart(2, '0')}
-                </div>
-                <div>
-                  <div className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-slate-500">{project.label}</div>
-                  <h3 className="work-title mt-2 text-2xl font-semibold tracking-tightest text-white sm:text-4xl">
-                    {project.title}
-                  </h3>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">{project.overview}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {project.technology.slice(0, 4).map((tech) => (
-                      <span key={tech} className="rounded-full border border-white/8 bg-white/3 px-2.5 py-1 text-[0.7rem] text-slate-300">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="work-arrow grid h-12 w-12 place-items-center rounded-full border border-white/8 bg-white/3 text-slate-300 transition group-hover:border-emerald-400/40 group-hover:bg-emerald-500/8 group-hover:text-emerald-300">
-                  <ArrowUpRight size={18} />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
-/* ----- Insights preview ----- */
-
-function InsightsPreview() {
-  return (
-    <section className="relative overflow-hidden bg-ink-900 py-24 lg:py-32">
-      <div className="paper-grid pointer-events-none absolute inset-0 opacity-50" />
-      <Container className="relative">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <SectionIndex index="09" label="Insights" />
-            <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
-              Practical <span className="font-serif-display italic text-emerald-200/90">perspectives</span> on business technology.
-            </h2>
-          </div>
-          <LinkButton href="/insights" variant="secondary" icon={<ArrowUpRight size={15} />}>
-            All insights
-          </LinkButton>
-        </div>
-
-        <div className="mt-14 grid gap-5 md:grid-cols-3">
-          {blogPosts.map((post, i) => (
-            <motion.div
-              key={post.slug}
-              initial={{ opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.3 }}
-              transition={{ duration: 0.55, delay: i * 0.07 }}
-            >
-              <Link
-                to={`/insights/${post.slug}`}
-                data-cursor="view"
-                data-cursor-label="Read"
-                className="card-lift group relative-sweep relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/8 bg-white/3 p-6"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-emerald-300/80">{post.category}</span>
-                  <span className="font-mono text-[0.65rem] text-slate-500">{post.readTime}</span>
-                </div>
-                <h3 className="mt-5 text-lg font-semibold leading-snug text-white transition group-hover:text-emerald-200">{post.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-400">{post.excerpt}</p>
-                <div className="mt-auto flex items-center justify-between pt-6 text-xs text-slate-500">
-                  <span>{post.date}</span>
-                  <span className="flex items-center gap-1.5 text-emerald-300 transition group-hover:translate-x-1">
-                    Read <ArrowUpRight size={12} />
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </Container>
-    </section>
-  )
-}
-
 /* ----- FAQ preview ----- */
 
 function FAQPreview() {
@@ -1272,7 +1158,7 @@ function FAQPreview() {
       <Container className="relative">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.5fr]">
           <div>
-            <SectionIndex index="10" label="FAQ" />
+            <SectionIndex index="08" label="FAQ" />
             <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
               Questions, <span className="font-serif-display italic text-emerald-200/90">answered.</span>
             </h2>
@@ -1330,33 +1216,88 @@ function FAQPreview() {
 
 function AboutPage() {
   usePageMeta(pageMeta.about)
+  const founders = [
+    {
+      name: 'Nikhil',
+      role: 'Co-Founder & CEO',
+    },
+    {
+      name: 'Atharva',
+      role: 'Co-Founder & Co-CTO',
+    },
+    {
+      name: 'Vedant',
+      role: 'Co-Founder & Co-CTO',
+    },
+  ]
+
   return (
     <div className="bg-ink-950">
       <PageHero
         eyebrow="01 — About"
         title={
           <>
-            Engineering with <span className="font-serif-display italic text-emerald-200/90">intent.</span>
+            Technology that <span className="font-serif-display italic text-emerald-200/90">works</span> for your business.
           </>
         }
-        subtitle="Synergy Brix is a technology, web development, and software development company building AI solutions and digital product engineering for modern businesses."
-        description="We act as a collaborative technology partner focused on solving real business problems with clear engineering and disciplined execution."
+        subtitle="SYNERGYBRIX is a technology company founded by three young IT professionals with a shared vision — to make business technology simpler, smarter, and more accessible for growing businesses."
+        description="We work with SMEs and mid-sized businesses to build practical digital solutions that help them manage their operations, customers, employees, data, and workflows more efficiently."
       />
-      <Container className="pb-24 lg:pb-32">
-        <div className="grid gap-5 md:grid-cols-2">
-          <InfoPanel title="Our Mission" text="To help businesses build reliable technology that supports growth, improves efficiency, and makes operations more confident and predictable." />
-          <InfoPanel title="Our Vision" text="To be a trusted technology partner for organizations that need strong engineering, thoughtful architecture, and business-aligned digital transformation." />
-          <InfoPanel title="Our Approach" text="We take a practical, structured approach: understand the problem, design the right solution, and build technology that fits the way your business actually works." />
-          <InfoPanel title="Engineering Principles" text="We focus on maintainability, clarity, scalability, security, and communication so technology stays useful as the business changes." />
+
+      <Container className="py-20 lg:py-28">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.35fr] lg:items-start">
+          <div>
+            <SectionIndex index="02" label="What we do" />
+            <h2 className="mt-6 text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+              Practical technology for <span className="font-serif-display italic text-emerald-200/90">real work.</span>
+            </h2>
+          </div>
+          <div className="space-y-5 text-base leading-8 text-slate-300 sm:text-lg">
+            <p>
+              From CRM and inventory management to workflow automation, analytics, customer portals, document management, and scheduling systems, we focus on creating technology that solves real business problems rather than adding unnecessary complexity.
+            </p>
+            <p className="font-medium text-emerald-200">Built by three minds. Driven by one vision.</p>
+          </div>
         </div>
-        <div className="mt-12 grid gap-8 lg:grid-cols-[1fr_1.4fr]">
-          <h3 className="text-3xl font-semibold tracking-tightest text-white sm:text-4xl">
-            Why <span className="font-serif-display italic text-emerald-200/90">we build.</span>
-          </h3>
-          <p className="text-base leading-8 text-slate-300 sm:text-lg">
-            From web development and custom software development to AI solutions and digital product engineering, we believe technology should create clarity, reduce friction, and unlock business opportunity. We build software that helps teams work smarter, serve customers better, and adapt with confidence.
-          </p>
+
+        <div className="mt-24">
+          <SectionIndex index="03" label="The founding team" />
+          <h2 className="mt-6 max-w-2xl text-4xl font-semibold tracking-tightest text-white sm:text-5xl">
+            Complementary strengths. <span className="font-serif-display italic text-emerald-200/90">One direction.</span>
+          </h2>
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            {founders.map((founder, index) => (
+              <motion.article
+                key={founder.name}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                className="card-lift rounded-3xl border border-white/8 bg-white/3 p-6"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-400/20 bg-emerald-500/10 font-serif-display text-2xl text-emerald-200">
+                  {founder.name[0]}
+                </div>
+                <h3 className="mt-6 text-2xl font-semibold text-white">{founder.name}</h3>
+                <p className="mt-1 text-sm font-medium text-emerald-200">{founder.role}</p>
+              </motion.article>
+            ))}
+          </div>
         </div>
+
+        <div className="mt-24 grid gap-5 lg:grid-cols-2">
+          <InfoPanel
+            title="Why SYNERGYBRIX?"
+            text="We believe technology shouldn't be complicated just because the business is growing. We take the time to understand how a business actually operates, identify where time and resources are being lost, and create technology that fits the way the business works."
+          />
+          <InfoPanel title="Our approach" text="Understand → Build → Implement → Improve. We're starting lean, working closely with our clients, and building SYNERGYBRIX with a long-term vision — to become a trusted technology partner for businesses looking to digitize, automate, and grow." />
+          <InfoPanel title="Our Vision" text="To empower growing businesses with technology that makes everyday operations simpler, smarter, and more efficient." />
+          <InfoPanel title="Our Mission" text="To build practical, scalable, and affordable technology solutions that solve real business problems and create measurable value for our clients." />
+        </div>
+
+        <p className="mt-20 text-center font-serif-display text-3xl italic text-emerald-200/90 sm:text-4xl">
+          SYNERGYBRIX — Where business needs meet technology.
+        </p>
       </Container>
     </div>
   )
