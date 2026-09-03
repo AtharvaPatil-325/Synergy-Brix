@@ -1217,15 +1217,15 @@ function AboutPage() {
   usePageMeta(pageMeta.about)
   const founders = [
     {
-      name: 'Nikhil',
+      name: 'Nikhil Asuri',
       role: 'Co-Founder & CEO',
     },
     {
-      name: 'Atharva',
+      name: 'Atharva Patil',
       role: 'Co-Founder & Co-CTO',
     },
     {
-      name: 'Vedant',
+      name: 'Vedant Patil',
       role: 'Co-Founder & Co-CTO',
     },
   ]
