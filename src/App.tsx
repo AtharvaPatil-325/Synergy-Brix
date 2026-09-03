@@ -23,7 +23,7 @@ import {
   Minus,
   Building2,
 } from 'lucide-react'
-import { FaLinkedinIn, FaGithub } from 'react-icons/fa'
+import { FaLinkedinIn, FaInstagram } from 'react-icons/fa'
 import {
   blogPosts,
   caseStudies,
@@ -61,8 +61,12 @@ const ALL_NAV = [
   { label: 'Home', id: 'home', to: '/#home' },
   { label: 'Services', id: 'services', to: '/#services' },
   { label: 'Solutions', id: 'solutions', to: '/solutions' },
+<<<<<<< HEAD
   { label: 'Projects', id: 'projects', to: '/#projects' },
   { label: 'About', id: 'about', to: '/about' },
+=======
+  { label: 'About', id: 'about', to: '/#about' },
+>>>>>>> 0928b68ed77d279f6f25cab1472e89a4376e9a4a
   { label: 'Contact', id: 'contact', to: '/#contact' },
 ]
 
@@ -255,9 +259,8 @@ function Navbar() {
                     aria-haspopup="menu"
                     onClick={() => setIsServicesOpen((open) => !open)}
                     data-cursor="hover"
-                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${
-                      location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
-                    }`}
+                    className={`nav-underline flex items-center gap-1 text-[0.85rem] font-medium transition-colors ${location.pathname === '/' && activeSection === item.id ? 'text-emerald-300' : 'text-slate-300 hover:text-white'
+                      }`}
                     data-active={(location.pathname === '/' && activeSection === item.id) || undefined}
                   >
                     {item.label}
@@ -302,10 +305,10 @@ function Navbar() {
                   onClick={() => goToSection(item.id)}
                   data-cursor="hover"
                   className={`nav-underline text-[0.85rem] font-medium transition-colors ${location.pathname === '/' && activeSection === item.id
+                    ? 'text-emerald-300'
+                    : location.pathname.startsWith(item.to) && item.to !== '/'
                       ? 'text-emerald-300'
-                      : location.pathname.startsWith(item.to) && item.to !== '/'
-                        ? 'text-emerald-300'
-                        : 'text-slate-300 hover:text-white'
+                      : 'text-slate-300 hover:text-white'
                     }`}
                   data-active={
                     (location.pathname === '/' && activeSection === item.id) ||
@@ -470,7 +473,7 @@ function Footer() {
             <h3 className="font-mono text-[0.7rem] uppercase tracking-[0.18em] text-emerald-300/80">Connect</h3>
             <ul className="mt-5 space-y-3 text-sm text-slate-300">
               <li className="flex items-center gap-2.5"><Mail size={15} className="text-emerald-300" /> synergy.brix@gmail.com</li>
-              
+
               <li className="flex items-center gap-2.5"><MapPin size={15} className="text-emerald-300" /> India • Remote-ready</li>
             </ul>
             <div className="mt-6 flex gap-3">
@@ -487,7 +490,7 @@ function Footer() {
                   {social.label.toLowerCase().includes('linkedin') ? (
                     <FaLinkedinIn size={16} className="transition-transform duration-300 group-hover:scale-110" />
                   ) : (
-                    <FaGithub size={16} className="transition-transform duration-300 group-hover:scale-110" />
+                    <FaInstagram size={16} className="transition-transform duration-300 group-hover:scale-110" />
                   )}
                 </a>
               ))}
@@ -531,7 +534,7 @@ function HomeJsonLd() {
         },
         description:
           'Synergy Brix is a technology and software development company building custom web applications, software solutions, AI-powered tools, business automation, and scalable digital products.',
-        sameAs: ['https://www.linkedin.com', 'https://github.com'],
+        sameAs: ['https://www.linkedin.com', 'https://www.instagram.com/synergy.brix'],
       },
       {
         '@type': 'WebSite',
@@ -1117,11 +1120,15 @@ function AboutValuesSection() {
             <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
               SYNERGYBRIX helps growing businesses make technology simpler, smarter, and more accessible through practical digital solutions.
             </p>
+<<<<<<< HEAD
             <div className="mt-7">
               <LinkButton href="/about" variant="secondary" icon={<ArrowRight size={15} className="arrow-shift" />}>
                 More About Us
               </LinkButton>
             </div>
+=======
+
+>>>>>>> 0928b68ed77d279f6f25cab1472e89a4376e9a4a
           </div>
           <ul className="relative grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {companyValues.map((value, i) => (
@@ -1147,6 +1154,10 @@ function AboutValuesSection() {
   )
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0928b68ed77d279f6f25cab1472e89a4376e9a4a
 /* ----- FAQ preview ----- */
 
 function FAQPreview() {
@@ -1755,7 +1766,7 @@ function ContactPage() {
             <ContactInfoCard icon={<Mail size={16} />} label="Email" value="synergy.brix@gmail.com" href="mailto:synergy.brix@gmail.com" />
             <ContactInfoCard icon={<MapPin size={16} />} label="Location" value="India • Remote-ready" />
             <ContactInfoCard icon={<FaLinkedinIn size={14} />} label="LinkedIn" value="Connect on LinkedIn" href="https://www.linkedin.com" />
-            <ContactInfoCard icon={<FaGithub size={14} />} label="GitHub" value="View on GitHub" href="https://github.com" />
+            <ContactInfoCard icon={<FaInstagram size={14} />} label="Instagram" value="Follow on Instagram" href="https://www.instagram.com/synergy.brix" />
           </motion.div>
         </motion.div>
         <motion.div initial={{ opacity: 0, scale: 0.94, y: 14 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} className="relative">
