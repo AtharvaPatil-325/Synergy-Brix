@@ -61,12 +61,8 @@ const ALL_NAV = [
   { label: 'Home', id: 'home', to: '/#home' },
   { label: 'Services', id: 'services', to: '/#services' },
   { label: 'Solutions', id: 'solutions', to: '/solutions' },
-<<<<<<< HEAD
   { label: 'Projects', id: 'projects', to: '/#projects' },
   { label: 'About', id: 'about', to: '/about' },
-=======
-  { label: 'About', id: 'about', to: '/#about' },
->>>>>>> 0928b68ed77d279f6f25cab1472e89a4376e9a4a
   { label: 'Contact', id: 'contact', to: '/#contact' },
 ]
 
@@ -1120,15 +1116,11 @@ function AboutValuesSection() {
             <p className="mt-5 max-w-md text-base leading-7 text-slate-400">
               SYNERGYBRIX helps growing businesses make technology simpler, smarter, and more accessible through practical digital solutions.
             </p>
-<<<<<<< HEAD
             <div className="mt-7">
               <LinkButton href="/about" variant="secondary" icon={<ArrowRight size={15} className="arrow-shift" />}>
                 More About Us
               </LinkButton>
             </div>
-=======
-
->>>>>>> 0928b68ed77d279f6f25cab1472e89a4376e9a4a
           </div>
           <ul className="relative grid grid-cols-1 gap-x-8 sm:grid-cols-2">
             {companyValues.map((value, i) => (
@@ -1154,10 +1146,6 @@ function AboutValuesSection() {
   )
 }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 0928b68ed77d279f6f25cab1472e89a4376e9a4a
 /* ----- FAQ preview ----- */
 
 function FAQPreview() {
